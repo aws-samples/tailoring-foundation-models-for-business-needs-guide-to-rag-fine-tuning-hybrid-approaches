@@ -42,9 +42,9 @@ if __name__ == "__main__":
     logger.info("Starting the application...")
     logger.info("START - Build Knowledge Base")
 
-    """
-    #knowledge_base_id = build_kb()
-    knowledge_base_id = 'QC3IOHHE5R' #TODO: If you want to skip the kb creation, set the correct kb_id and commented out above line
+    
+    knowledge_base_id = build_kb()
+    #knowledge_base_id = 'QC3IOHHE5R' #TODO: If you want to skip the kb creation, set the correct kb_id and commented out above line
 
     logger.info("FINISH - Build Knowledge Base")
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     )
 
     rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
-    """
+    
 
     
     finetuning_obj = finetuning.Finetuning(

@@ -33,19 +33,19 @@ def json_to_jsonl(json_file_path, output_file_path):
             json.dump(record, outfile)
             outfile.write('\n') 
 
-def template_and_predict(predictor, template, question, ground_truth, input_output_demarkation_key="\n\n### Response:\n"):
+def template_and_predict(predictor, template, question, context, ground_truth, input_output_demarkation_key="\n\n### Response:\n"):
     prompt = template["prompt"]
-    inputs = prompt.format(question=question)
+    inputs = prompt.format(question=question, context=context)
     inputs += input_output_demarkation_key
     payload = {"inputs": inputs, "parameters": {"max_new_tokens": 4096}}
     for trial_count in range(0,5):
         try:
             response = predictor.predict(payload)
             return inputs, ground_truth, response
-        except:
+        except Exception as e:
             trial_count += 1
-            print(f"Trial #{trial_count}, Error in template_and_predict.")
-            continue 
+            print(f"Trial #{trial_count}, Error in template_and_predict: {e}")
+            continue
     return inputs, ground_truth, 'Error!'
     
 

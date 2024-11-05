@@ -47,7 +47,7 @@ class OpenSearchServerlessConfig:
 class RAGConfig:
     MODEL_NAME = "llama3_8b_instruct"
     MODEL_ID = MODELS_RAG["llama3_8b_instruct"]
-    NUMBER_OF_RESULTS = 5  # TODO:
+    NUMBER_OF_RESULTS = 1  # TODO: 
 
 class FinetuningConfig:
     MODEL_NAME = "llama3_8b_instruct"

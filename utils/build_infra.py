@@ -51,10 +51,10 @@ def run_command_simpler(command, cwd=None):
     return result.stdout
 
 def delete_all():
-    run_command("cdk destroy --all", cwd=rag_dir)
+    run_command(f"cdk destroy --all {flag}", cwd=rag_dir)
 
 def build_kb():
-    """
+    
     # Run the prepare script
     logger.info("Running the prepare script...")
     run_command("./prepare.sh", cwd=rag_dir)
@@ -76,7 +76,7 @@ def build_kb():
 
     logger.info("Deploying OpenSearchServerlessInfraStack...")
     run_command(f"cdk deploy OpenSearchServerlessInfraStack {flag}", cwd=rag_dir)
-    """
+    
 
     logger.info("Deploying KbInfraStack...")
     output = run_command(f"cdk deploy KbInfraStack {flag}", cwd=rag_dir)

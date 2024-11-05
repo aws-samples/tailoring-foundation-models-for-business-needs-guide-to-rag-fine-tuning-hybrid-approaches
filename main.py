@@ -2,7 +2,7 @@
 import os,sys,subprocess,time
 
 import aws_cdk as cdk
-from utils.build_infra import build_kb
+from utils.build_infra import build_kb, delete_all
 from constructs import DependencyGroup
 
 from config import EnvSettings, KbConfig, DsConfig, RAGConfig, FinetuningConfig
@@ -14,8 +14,11 @@ from infrastructure.stacks.s3_stack import S3Stack
 from utils.helpers import logger, upload_data_S3
 from src import rag
 from src import finetuning
+from src import hybrid
 import boto3
 from sagemaker.s3 import S3Uploader
+
+from utils.helpers import json_to_jsonl, template_and_predict
 
 region = EnvSettings.ACCOUNT_REGION
 account_id = EnvSettings.ACCOUNT_ID
@@ -43,8 +46,8 @@ if __name__ == "__main__":
     logger.info("START - Build Knowledge Base")
 
     
-    knowledge_base_id = build_kb()
-    #knowledge_base_id = 'QC3IOHHE5R' #TODO: If you want to skip the kb creation, set the correct kb_id and commented out above line
+    #knowledge_base_id = build_kb()
+    knowledge_base_id = 'YBQBDFRQSJ' #TODO: If you want to skip the kb creation, set the correct kb_id and commented out above line
 
     logger.info("FINISH - Build Knowledge Base")
 
@@ -69,7 +72,7 @@ if __name__ == "__main__":
         kb_configs=kb_configs,
     )
 
-    rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
+    #rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
     
 
     
@@ -87,12 +90,26 @@ if __name__ == "__main__":
     predictor = finetuning_obj.finetune_model(data_location)
     logger.info("FINISH - Finetune Model")
 
-    #endpoint_name = "llama-3-1-8b-instruct-2024-10-29-16-19-08-933"  TODO: If you want to use already deployed model, find the correct endpoint name and commented out above 4 lines and  
+    #endpoint_name = "llama-3-1-8b-instruct-2024-10-31-15-14-54-211"  #TODO: If you want to use already deployed model, find the correct endpoint name and commented out above 4 lines and  
+    finetuning_obj.test_finetuned_model(predictor,None)
+
     #finetuning_obj.test_finetuned_model(None, endpoint_name)
 
-    finetuning_obj.test_finetuned_model(predictor, None)
     logger.info("FINISH - Test Finetune model")
 
 
-    #test the hybrid with test dataset
+    hybrid_obj = hybrid.Hybrid(
+        predictor, # predictor
+        None, #endpoint_name,
+        rag_obj,
+        finetuning_obj,
+        knowledge_base_id,
+        model_id_rag
+    )
+
+    hybrid_obj.test_hybrid_model()
+    
+
     #create clean-up scripts 
+
+    #delete_all()

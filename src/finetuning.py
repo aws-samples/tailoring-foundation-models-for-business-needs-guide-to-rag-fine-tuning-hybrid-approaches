@@ -90,15 +90,21 @@ class Finetuning():
                 "epoch": "3",
                 "max_input_length": "4096",
             },
-            instance_type='ml.g5.12xlarge', # default value
+            instance_type= 'ml.g5.12xlarge', # default value
             sagemaker_session=self.sagemaker_session,
             output_path=output_path,
-            role="arn:aws:iam::339712995635:role/Admin"
+            role="arn:aws:iam::339712995635:role/Admin" # TODO: role should not be hardcoded
         )
 
         estimator.fit({"training": train_data_location})
 
-        predictor = estimator.deploy()
+        predictor = estimator.deploy(
+                initial_instance_count=1, 
+                instance_type='ml.g4dn.12xlarge', 
+                container_startup_health_check_timeout=900
+            )
+        # 'ml.g5.8xlarge' worked for finetuning results, not for hybrid
+        # 'ml.p3.8xlarge' and 'ml.g4dn.12xlarge' gave an error
 
         return predictor
 
@@ -129,7 +135,7 @@ class Finetuning():
                 question = product_data.get("question")
                 ground_truth = product_data.get("answer")
 
-                input_text, ground_truth, llm_response = template_and_predict(predictor, template, question, ground_truth)
+                input_text, ground_truth, llm_response = template_and_predict(predictor, template, question,"", ground_truth)
 
                 eval_score = evaluate(ground_truth, llm_response) # just a dummy number for now TODO: Once evaluate is implemented, we'll have different scores, so include each score in the result dict.
 

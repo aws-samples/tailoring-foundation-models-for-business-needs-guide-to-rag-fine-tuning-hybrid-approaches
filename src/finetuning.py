@@ -136,24 +136,25 @@ class Finetuning():
                 ground_truth = product_data.get("answer")
 
                 input_text, ground_truth, llm_response = template_and_predict(predictor, template, question,"", ground_truth)
-
-                eval_score = evaluate(ground_truth, llm_response) # just a dummy number for now TODO: Once evaluate is implemented, we'll have different scores, so include each score in the result dict.
+                
+                try:
+                    llm_response  = llm_response['generated_text']
+                except Exception as e:
+                    print("WARNING! Llm responce does not have generated_text field")
 
                 results_dict = {
                     'input_text': input_text,
                     'ground_truth': ground_truth,
                     'llm_response': llm_response,
-                    'score': eval_score
                 }
                 results.append(results_dict)
 
                 print(f'Input: {input_text}')
                 print(f'Ground_truth: {ground_truth}')
                 print(f'LLM response: {llm_response}')
-                print(f'Eval Score: {eval_score}')
                 counter += 1
 
-        with open( f"data/{self.finetuning_method}/results.json", 'w') as json_file:
+        with open( f"data/output/{self.finetuning_method}_results.json", 'w') as json_file:
             json.dump(results, json_file, indent=4)
         
                 

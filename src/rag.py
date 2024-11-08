@@ -80,26 +80,22 @@ class Rag:
                 response = bedrock_handler.invoke_model(bedrock_messages)
                 response_text = response['output']['message']['content'][0]['text']
 
-                
-                eval_score = evaluate(ground_truth, response_text) # just a dummy number for now TODO: Once evaluate is implemented, we'll have different scores, so include each score in the result dict.
-
                 results_dict = {
                     'input_text': question,
                     'ground_truth': ground_truth,
                     'llm_response': response_text,
-                    'score': eval_score
+                    'context': context
                 }
                 results.append(results_dict)
 
                 print(f'Input: {question}')
                 print(f'Ground_truth: {ground_truth}')
                 print(f'LLM response: {response_text}')
-                print(f'Eval Score: {eval_score}')
                 
                 print(f'Context: {context}')
                 counter += 1
 
-        results_file_path = "data/rag/results.json"
+        results_file_path = "data/output/rag_results.json"
         os.makedirs(os.path.dirname(results_file_path), exist_ok=True)
 
         with open(results_file_path, 'w') as json_file:

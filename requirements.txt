@@ -4,3 +4,5 @@ aws_lambda_powertools
 aws-cdk-lib
 boto3
 sagemaker
+evaluate
+bert_score

@@ -82,8 +82,7 @@ class Hybrid():
                 "If you don't know the answer, just say, \"I don't know.\" Don't make anything up.\n"
                 "### Instruction:\n"
                 "Answer the customer's question: {question}\n\n"
-                "### Input:\n"
-                "{context}"
+                "### Input:\n{context}\n\n"
             ),
             "completion": "{answer}"
         }         
@@ -101,6 +100,10 @@ class Hybrid():
                 context = self.rag_obj.get_context(self.knowledge_base_id, question)
 
                 input_text, ground_truth, llm_response = template_and_predict(self.predictor, template, question, context, ground_truth)
+                try:
+                    llm_response  = llm_response['generated_text']
+                except Exception as e:
+                    print("WARNING! Llm responce does not have generated_text field")
 
                 """
                 bedrock_messages = []
@@ -117,23 +120,21 @@ class Hybrid():
                 make anything up. ### Instruction:\n Answer the customer\'s question: What are the key safety considerations and precautions 
                 outlined in the safety instructions for the MANUFLEX 9000?\n\n\n\n### Response:\n', 'parameters': {'max_new_tokens': 4096}}
                 """
-                eval_score = evaluate(ground_truth, llm_response) # just a dummy number for now TODO: Once evaluate is implemented, we'll have different scores, so include each score in the result dict.
 
                 results_dict = {
                     'input_text': input_text,
                     'ground_truth': ground_truth,
                     'llm_response': llm_response,
-                    'score': eval_score
+                    'context': context
                 }
                 results.append(results_dict)
 
                 print(f'Input: {input_text}')
                 print(f'Ground_truth: {ground_truth}')
                 print(f'LLM response: {llm_response}')
-                print(f'Eval Score: {eval_score}')
                 counter += 1
                 
         # TODO: create a results folder and put all the results there
-        with open( f"data/hybrid/results.json", 'w') as json_file:
+        with open( f"data/output/hybrid_results.json", 'w') as json_file:
             json.dump(results, json_file, indent=4)
         

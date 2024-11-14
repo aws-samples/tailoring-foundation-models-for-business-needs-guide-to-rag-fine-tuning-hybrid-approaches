@@ -99,9 +99,10 @@ class Finetuning():
 
         predictor = estimator.deploy(
                 initial_instance_count=1, 
-                instance_type='ml.g4dn.12xlarge', 
-                container_startup_health_check_timeout=900
+                instance_type='ml.g5.12xlarge', 
+                container_startup_health_check_timeout=240
             )
+        # requested usage for ml.g5.12xlarge for endpoint 
         # 'ml.g5.8xlarge' worked for finetuning results, not for hybrid
         # 'ml.p3.8xlarge' and 'ml.g4dn.12xlarge' gave an error
 

@@ -36,10 +36,13 @@ def json_to_jsonl(json_file_path, output_file_path):
 def clean_context(context):
     documents = re.split(r'Document \d+:\s*', context)
     context = ""
-    for doc in documents[1:]:
+    for i,doc in enumerate(documents[1:]):
+        context += f"Document {i}:"
         doc = doc.strip()
         doc = doc.replace("-", "")
         doc = doc.replace("/", " ")
+        doc = doc.replace("< end>", "")
+        doc = doc.replace("</end>", "")
         doc = re.sub(r'[^\x00-\x7F]+', '', doc) #deletes non ascii chars
         doc = re.sub(r'([0-9]|[abcxyzABCXYZ])[.:-]$', '', doc)
         doc = re.sub(r':$', '', doc).strip()
@@ -54,7 +57,12 @@ def template_and_predict(predictor, template, question, context, ground_truth, i
     inputs = prompt.format(question=question, context=context)
     inputs += input_output_demarkation_key
     payload = {"inputs": inputs, "parameters": {"max_new_tokens": 4096}}
-    for trial_count in range(0,1):
+    print(f"Payload: {payload}")
+
+    response = predictor.predict(payload)
+    return inputs, ground_truth, response
+    """
+    for trial_count in range(0,2):
         try:
             response = predictor.predict(payload)
             return inputs, ground_truth, response
@@ -63,7 +71,9 @@ def template_and_predict(predictor, template, question, context, ground_truth, i
             print(f"Trial #{trial_count}, Error in template_and_predict: {e}")
             print(f"Context: {context}")
             continue
+    
     return inputs, ground_truth, f"Error!"
+    """    
     
 
 

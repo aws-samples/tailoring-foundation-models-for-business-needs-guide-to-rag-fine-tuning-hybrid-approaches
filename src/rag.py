@@ -3,7 +3,7 @@ import json
 from typing import Optional
 import os, boto3
 from utils.bedrock import BedrockHandler, KBHandler
-from src.evaluation import evaluate
+from utils.helpers import clean_context
 
 class Rag:
     """
@@ -73,6 +73,7 @@ class Rag:
 
                 bedrock_messages = []
                 context = self.get_context(knowledge_base_id, question)
+                context = clean_context(context)
 
                 bedrock_messages.append(
                     bedrock_handler.user_message(question, context)

@@ -10,12 +10,14 @@ NOTE: If deploying to production, set this to true.
 EMBEDDING_MODEL_IDs = ["amazon.titan-embed-text-v2:0"]
 CHUNKING_STRATEGIES = {0:"Default chunking",1:"Fixed-size chunking", 2:"No chunking"}
 # TODO: model ids are differ from finetuning and rag. Make a nicer solution for handling this.
+
+#Sagemaker
 MODELS_FINETUNING = {
         #"claude-v2" : "anthropic.claude-v2", # check the id
         #"command-light": "cohere.command-light-text-v14", # check the id 
         "llama3_8b_instruct": "meta-textgeneration-llama-3-1-8b-instruct"
     }
-
+#Bedrock
 MODELS_RAG = {
         "claude-v2" : "anthropic.claude-v2", # check the id
         "command-light": "cohere.command-light-text-v14", # check the id 
@@ -47,7 +49,7 @@ class OpenSearchServerlessConfig:
 class RAGConfig:
     MODEL_NAME = "llama3_8b_instruct"
     MODEL_ID = MODELS_RAG["llama3_8b_instruct"]
-    NUMBER_OF_RESULTS = 1  # TODO: 
+    NUMBER_OF_RESULTS = 3  # TODO: 
 
 class FinetuningConfig:
     MODEL_NAME = "llama3_8b_instruct"
@@ -55,4 +57,10 @@ class FinetuningConfig:
     METHOD = "instruction_finetuning" # TODO: Choose Finetuning method. eg: "instruction_finetuning", "domain_adaptation" 
 
 
-    
+class EvaluationConfig:
+    #TODO: Add or extract bedrock model ids if necessary
+    MODELS_EVAL = {
+        "mistral_8_7b": "mistral.mixtral-8x7b-instruct-v0:1",
+        "command_r_plus": "cohere.command-r-plus-v1:0",
+        "claude3_haiku": "anthropic.claude-3-haiku-20240307-v1:0"
+    }

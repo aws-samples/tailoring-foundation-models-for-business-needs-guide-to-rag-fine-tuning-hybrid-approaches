@@ -1,5 +1,4 @@
 from utils.helpers import json_to_jsonl, template_and_predict, update_trust_relationship
-from src.evaluation import evaluate
 
 from sagemaker import Session
 from sagemaker import Predictor

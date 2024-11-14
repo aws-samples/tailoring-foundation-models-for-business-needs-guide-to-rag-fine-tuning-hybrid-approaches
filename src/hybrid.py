@@ -7,7 +7,6 @@ from utils.bedrock import BedrockHandler
 
 import os, json, boto3
 from utils.helpers import json_to_jsonl, template_and_predict
-from src.evaluation import evaluate
 
 from botocore.config import Config
 from sagemaker import Session

@@ -1,4 +1,7 @@
 import logging, boto3, os, json, re
+from typing import Dict, List, Tuple
+from dataclasses import dataclass
+
 
 # Configure logging
 logging.basicConfig(
@@ -33,73 +36,36 @@ def json_to_jsonl(json_file_path, output_file_path):
             json.dump(record, outfile)
             outfile.write('\n') 
 
-def clean_context(context):
-    documents = re.split(r'Document \d+:\s*', context)
-    context = ""
-    for i,doc in enumerate(documents[1:]):
-        context += f"Document {i}:"
-        doc = doc.strip()
-        doc = doc.replace("-", "")
-        doc = doc.replace("/", " ")
-        doc = doc.replace("< end>", "")
-        doc = doc.replace("</end>", "")
-        doc = re.sub(r'[^\x00-\x7F]+', '', doc) #deletes non ascii chars
-        doc = re.sub(r'([0-9]|[abcxyzABCXYZ])[.:-]$', '', doc)
-        doc = re.sub(r':$', '', doc).strip()
-        context += doc
-    return context
-
 
 def template_and_predict(predictor, template, question, context, ground_truth, input_output_demarkation_key="\n\n### Response:\n"):
-    prompt = template["prompt"]
-    context = clean_context(context)
 
-    inputs = prompt.format(question=question, context=context)
+    inputs = template["prompt"].format(question=question, context=context)
     inputs += input_output_demarkation_key
     payload = {"inputs": inputs, "parameters": {"max_new_tokens": 4096}}
-    print(f"Payload: {payload}")
 
     response = predictor.predict(payload)
     return inputs, ground_truth, response
+
+
+def load_json_file(file_path: str) -> List[Dict]:
+        """Load and parse a JSON file."""
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+
+
+def get_stack_outputs(stack_name: str, region: str) -> dict:
     """
-    for trial_count in range(0,2):
-        try:
-            response = predictor.predict(payload)
-            return inputs, ground_truth, response
-        except Exception as e:
-            trial_count += 1
-            print(f"Trial #{trial_count}, Error in template_and_predict: {e}")
-            print(f"Context: {context}")
-            continue
+    Get CloudFormation stack outputs
     
-    return inputs, ground_truth, f"Error!"
-    """    
+    Args:
+        stack_name: Name of the CloudFormation stack
+        region: AWS region
     
-
-
-def update_trust_relationship(iam_client, role_name, principal_service, actions=None):
+    Returns:
+        dict: Dictionary of stack outputs
     """
-    Updates the trust relationship of an IAM role.
-
-    Parameters:
-    - iam_client: The Boto3 IAM client.
-    - role_name: Name of the IAM role to update.
-    - principal_service: The service that will be allowed to assume the role (e.g., 'sagemaker.amazonaws.com').
-    - actions: A list of actions to allow. Defaults to ['sts:AssumeRole'] if not provided.
-    """
-    if actions is None:
-        actions = ["sts:AssumeRole"]
+    cloudformation = boto3.client('cloudformation', region_name=region)
+    response = cloudformation.describe_stacks(StackName=stack_name)
+    outputs = response['Stacks'][0]['Outputs']
     
-    trust_policy = {
-        "Version": "2012-10-17", # update if needed in the future
-        "Statement": [
-            {
-                "Effect": "Allow",
-                "Principal": { "Service": principal_service },
-                "Action": actions
-            }
-        ]
-    }
-
-    iam_client.update_assume_role_policy(RoleName=role_name, PolicyDocument=json.dumps(trust_policy))
-
+    return {output['OutputKey']: output['OutputValue'] for output in outputs}

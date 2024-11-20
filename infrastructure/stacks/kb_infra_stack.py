@@ -67,6 +67,7 @@ class KbInfraStack(Stack):
         self.sync_data_source(self.ingest_lambda)
 
         CfnOutput(self, "KnowledgeBaseId", value=self.knowledge_base.attr_knowledge_base_id)
+        CfnOutput(self, "DataSourceId", value=self.data_source.attr_data_source_id) 
 
 
     
@@ -153,7 +154,7 @@ class KbInfraStack(Stack):
     ingest_lambda= lambda_.Function(
         self,
         "IngestionJob",
-        runtime=lambda_.Runtime.PYTHON_3_8,
+        runtime=lambda_.Runtime.PYTHON_3_10,
         handler="ingestJobLambda.lambda_handler",
         code=lambda_.Code.from_asset("./src/IngestJob"),
         timeout=Duration.minutes(15),

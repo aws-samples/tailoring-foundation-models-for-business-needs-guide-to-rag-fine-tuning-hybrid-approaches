@@ -5,7 +5,7 @@ import aws_cdk as cdk
 from utils.build_infra import build_kb, delete_all
 from constructs import DependencyGroup
 
-from config import EnvSettings, KbConfig, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig
+from config import EnvSettings, KbConfig, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig, Templates
 
 from infrastructure.stacks.kb_role_stack import KbRoleStack
 from infrastructure.stacks.oss_infra_stack import OpenSearchServerlessInfraStack
@@ -17,7 +17,7 @@ from src import rag, finetuning, hybrid, llm_evaluator, evaluation
 import boto3
 from sagemaker.s3 import S3Uploader
 
-from utils.helpers import json_to_jsonl, template_and_predict
+from utils.helpers import json_to_jsonl, template_and_predict, get_stack_outputs
 
 
 
@@ -30,39 +30,41 @@ kb_name = KbConfig.KB_NAME
 bucket_name = DsConfig.S3_BUCKET_NAME
 kb_data_folder = DsConfig.KB_DATA_FOLDER
 
-number_of_results = RAGConfig.NUMBER_OF_RESULTS
 model_id_finetuning = FinetuningConfig.MODEL_ID
 model_name_finetuning = FinetuningConfig.MODEL_NAME
 finetuning_method = FinetuningConfig.METHOD
+num_epoch = FinetuningConfig.NUM_EPOCH
 
+number_of_results = RAGConfig.NUMBER_OF_RESULTS
 model_id_rag = RAGConfig.MODEL_ID
 model_name_rag = RAGConfig.MODEL_NAME
 
 evaluator_models = EvaluationConfig.MODELS_EVAL
+evaluator_prompt_template = EvaluationConfig.PROMPT_TEMPLATE
+evaluator_score_pattern = EvaluationConfig.SCORE_PATTERN
+
+
+finetuning_template = Templates.FINETUNING_TEMPLATE
+hybrid_template = Templates.HYBRID_TEMPLATE
+rag_template = Templates.RAG_TEMPLATE
 
 s3_client = boto3.client('s3', region_name=region) 
 data_folder_path = "data"
 
 
 if __name__ == "__main__":
+    
     logger.info("Starting the application...")
     logger.info("START - Build Knowledge Base")
 
-    
-    #knowledge_base_id = build_kb()
-    knowledge_base_id = 'YBQBDFRQSJ' #TODO: If you want to skip the kb creation, set the correct kb_id and commented out above line
+    stack_outputs = get_stack_outputs("KbInfraStack", region)
+
+    knowledge_base_id = stack_outputs['KnowledgeBaseId']
+    data_source_id = stack_outputs['DataSourceId']
+    logger.info(f"Knowledge Base ID: {knowledge_base_id}")
+    logger.info(f"Data Source ID: {data_source_id}")
 
     logger.info("FINISH - Build Knowledge Base")
-
-    #upload the data to s3    
-    logger.info("START - KB Data Load into S3")
-    kb_data_folder = f'{data_folder_path}/kb-data'
-    #upload_data_S3(s3_client, data_folder_path, kb_data_folder, bucket_name)
-    # logger.info("FINISH - KB Data Load into S3")
-
-    # logger.info("START - Waiting for data sync for KB")
-    # time.sleep(60) # Waiting for 1 min, to make sure that the data is sync, TODO: Find a better way
-    # logger.info("FINISH - Waiting for data sync for KB")
 
     kb_configs = {
         "vectorSearchConfiguration": {
@@ -73,60 +75,99 @@ if __name__ == "__main__":
     rag_obj = rag.Rag(
         bedrock_region=region,
         kb_configs=kb_configs,
+        rag_template = rag_template
     )
+    kb_data_path = f'{data_folder_path}/{kb_data_folder}'
+    upload_data_S3(s3_client, data_folder_path, kb_data_path, bucket_name)
+    logger.info("START - Knowledge base sync")
+    if not rag_obj.wait_for_kb_sync(
+        knowledge_base_id=knowledge_base_id,
+        data_source_id=data_source_id
+    ):
+        raise Exception("Knowledge base sync failed or timed out")
+    logger.info("FINISH - Knowledge base sync")
 
-    #rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
-    
+    logger.info("START - Testing RAG")
+    rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
+    logger.info("FINISH - Testing RAG")
 
-    
     finetuning_obj = finetuning.Finetuning(
         bedrock_region=region,
         finetuning_method = finetuning_method,
         model_id = model_id_finetuning,
-        bucket_name = bucket_name
+        model_name = model_name_finetuning,
+        bucket_name = bucket_name,
+        template = finetuning_template,
+        num_epoch = num_epoch
 
     )
 
-    #data_location = finetuning_obj.prepare_data_finetuning()
-    #logger.info("FINISH - Prepare_data_finetuning")
+    logger.info("START - Prepare_data_finetuning")
+    data_location = finetuning_obj.prepare_data_finetuning()
+    logger.info("FINISH - Prepare_data_finetuning")
 
-    #predictor = finetuning_obj.finetune_model(data_location)
-    # logger.info("FINISH - Finetune Model")
+    logger.info("START - Finetune Model")
+    predictor = finetuning_obj.finetune_model(data_location, True)
+    #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct")
+    logger.info("FINISH - Finetune Model")
 
-    endpoint_name = "llama-3-1-8b-instruct-2024-11-14-14-03-53-799" #"llama-3-1-8b-instruct-2024-10-31-15-14-54-211"  #TODO: If you want to use already deployed model, find the correct endpoint name and commented out above 4 lines and  
-    #finetuning_obj.test_finetuned_model(predictor,None)
+    #endpoint_name = "llama-3-1-8b-instruct-2024-11-14-14-03-53-799" #TODO: If you want to use already deployed model, find the correct endpoint name
+    logger.info("START - Testing FINETUNING")
+    finetuning_obj.test_finetuned_model(predictor, None)
+    logger.info("FINISH - Testing FINETUNING")
 
-    #finetuning_obj.test_finetuned_model(None, endpoint_name)
-
-    logger.info("FINISH - Test Finetune model")
-
+    finetuning_obj.test_finetuned_model(None, endpoint_name)
 
     hybrid_obj = hybrid.Hybrid(
         None, # predictor
-        endpoint_name, #endpoint_name,
+        'llama3-8b-instruct-endpoint', #endpoint_name,
         rag_obj,
         finetuning_obj,
         knowledge_base_id,
-        model_id_rag
+        model_id_rag,
+        hybrid_template
     )
 
-    #hybrid_obj.test_hybrid_model()
+    logger.info("START - Testing RAG on Finetuned model")
+    hybrid_obj.test_hybrid_model()
+    logger.info("FINISH - Testing RAG on Finetuned model")
+
+
     eval_obj = evaluation.Evaluation(
         bedrock_region=region,
-        evaluator_models = evaluator_models
+        evaluator_models = evaluator_models,
+        evaluator_prompt_template = evaluator_prompt_template,
+        score_pattern = evaluator_score_pattern
     )
 
     finetuning_results = 'data/output/instruction_finetuning_results.json'
     rag_results = 'data/output/rag_results.json'
     hybrid_results = 'data/output/hybrid_results.json'
+
+    logger.info("START - Evaluation")
+
+    scores = eval_obj.calculate_scores(
+        finetuning_results,
+        rag_results,
+        hybrid_results
+    )
+    eval_obj.save_scores(
+        scores,
+        finetuning_results,
+        rag_results,
+        hybrid_results
+    )
+
+    eval_obj.calculate_aggregated_scores(
+        finetuning_results,
+        rag_results,
+        hybrid_results
+    )
+    logger.info("FINISH - Evaluation")
+
     
-    bert_score_finetuning, bert_score_rag, bert_score_hybrid, llm_evaluator_scores_finetuning, llm_evaluator_scores_rag, llm_evaluator_scores_hybrid = eval_obj.calculate_scores(finetuning_results, rag_results, hybrid_results)
-   
-    eval_obj.save_scores(finetuning_results,rag_results, hybrid_results, bert_score_finetuning, bert_score_rag, bert_score_hybrid, llm_evaluator_scores_finetuning, llm_evaluator_scores_rag, llm_evaluator_scores_hybrid)
     
-    eval_obj.calculate_aggregated_scores(finetuning_results,rag_results, hybrid_results)
-
-
-    #create clean-up scripts 
-
-    #delete_all()
+    #Clean-up
+    #finetuning_obj.delete_endpoint(endpoint_name = 'llama3-8b-instruct-endpoint')
+    #infra_dir = "./infrastructure"
+    #run_command(f"cdk destroy --all", cwd=infra_dir) #TODO: Should we do this in code or should users do it from terminal

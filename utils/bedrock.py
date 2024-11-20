@@ -27,7 +27,6 @@ class BedrockHandler:
     @staticmethod
     def user_message(
         message: str,
-        context: Optional[str] = None
     ) -> dict:
         """
         Create a message dictionary representing a user's query, optionally including context and uploaded images.
@@ -40,26 +39,13 @@ class BedrockHandler:
             dict: A message dictionary with the role set to "user" and the content containing the provided message,
                   context (if available), and base64-encoded image data (if provided).
         """
-        context_message = (
-            f"Answer the following question based on the provided context: \n\n {context} \n\n "
-            if context
-            else ""
-        )
-        
-        new_message = {
-            "role": "user",
-            "content": [{"text": f"{context_message} question: {message}"}],
-        }
-        
-        #old version
-        """
+
         new_message = {
             "role": "user",
             "content": [
-                {"type": "text", "text": f"{context_message} question: {message}"}
+                {"text": f"{message}"}
             ],
         }
-        """
         return new_message
         
         

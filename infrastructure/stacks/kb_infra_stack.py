@@ -1,5 +1,5 @@
 from constructs import Construct
-
+import json 
 import aws_cdk as core
 from aws_cdk import (
     Duration,
@@ -34,7 +34,7 @@ account_id = EnvSettings.ACCOUNT_ID
 collectionName= OpenSearchServerlessConfig.COLLECTION_NAME
 indexName= OpenSearchServerlessConfig.INDEX_NAME
 
-import json 
+
 embeddingModelId= KbConfig.EMBEDDING_MODEL_ID
 max_tokens = KbConfig.MAX_TOKENS
 overlap_percentage = KbConfig.OVERLAP_PERCENTAGE
@@ -191,47 +191,3 @@ class KbInfraStack(Stack):
         actions=["bedrock:StartIngestionJob"],
         resources=["arn:aws:bedrock:*:*:knowledge-base/*"]
     ))
-
-
-  def create_query_lambda(self, knowledge_base) -> lambda_:
-    query_lambda = lambda_.Function(
-        self, "Query",
-        runtime=lambda_.Runtime.PYTHON_3_10,
-        handler="queryKBLambda.handler",
-        code=lambda_.Code.from_asset("./src/queryKnowledgeBase"),
-        timeout=Duration.minutes(5),
-        environment={
-            "KNOWLEDGE_BASE_ID": knowledge_base.attr_knowledge_base_id
-        }
-    )
-    fn_url = query_lambda.add_function_url(
-        auth_type=lambda_.FunctionUrlAuthType.NONE,
-        invoke_mode=lambda_.InvokeMode.BUFFERED,
-        cors={
-            "allowed_origins": ["*"],
-            "allowed_methods": [lambda_.HttpMethod.POST]
-        }
-    )
-
-    query_lambda.add_to_role_policy(iam.PolicyStatement(
-        actions=["bedrock:RetrieveAndGenerate",
-                "bedrock:Retrieve",
-                "bedrock:InvokeModel", ],
-        resources=["*"]
-    ))
-
-    return query_lambda
-  
-  def add_eventbridge_rule(self, bucket, lambda_function):
-    # Create an EventBridge rule.
-    rule = events.Rule(self, "MyRule",
-        event_pattern=events.EventPattern(
-            source=["aws.s3"],
-            detail_type=["Object Created"],
-        )
-    )
-    # Add a target to the rule.
-    rule.add_target(lambda_function)
-
-    # Grant the Lambda function permission to access the S3 bucket.
-    bucket.grant_read(lambda_function)

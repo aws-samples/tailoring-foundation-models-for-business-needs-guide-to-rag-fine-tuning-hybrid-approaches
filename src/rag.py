@@ -61,7 +61,7 @@ class Rag:
                     job_end_time = datetime.fromisoformat(job_end_time.replace('Z', '+00:00')).astimezone(timezone_offset)
                 
                 time_since_completion = (datetime.now(timezone_offset) - job_end_time).total_seconds()
-                if time_since_completion < 5:
+                if time_since_completion < 2:
                     print(f"Recent successful sync found (completed {time_since_completion:.0f} seconds ago)")
                     return True
             
@@ -171,6 +171,7 @@ class Rag:
                 print(f'LLM response: {response_text}')
                 
                 print(f'Context: {context}')
+
                 counter += 1
 
         results_file_path = "data/output/rag_results.json"

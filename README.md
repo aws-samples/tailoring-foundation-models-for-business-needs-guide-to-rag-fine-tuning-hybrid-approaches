@@ -1,126 +1,93 @@
+# rag-finetuning
 
-# Deploy e2e RAG solution (using Knowledgebases for Amazon Bedrock) via CDK
-<mark>By no means this deployment is production-ready deployment. Please adjust the IAM polies and permissions as per your organization policy)</mark>
 
-This is a complete setup for automatic deployment of end-to-end RAG workflow using Knowledge Bases for Amazon Bedrock. 
-Following resources will get created and deployed:
-- IAM role
-- Open Search Serverless Collection and Index
-- Set up Data Source (DS) and Knowledge Base (KB)
 
-## Deployment steps
+## Getting started
 
-```
-    -  git clone https://github.com/aws-samples/amazon-bedrock-samples.git
-    
-    -  cd knowledge-bases/features-examples/04-infrastructure/e2e-rag-deployment-using-bedrock-kb-cdk
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+
+## Add your files
+
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
 
 ```
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually. 
-
-__NOTE:__ *This project assumes you have python3.8 installed.
-If you want to use a later version, you may have to make changes to the dependency versions
-in requirements.txt.*
-
-
-
-To manually create a virtualenv on MacOS and Linux:
-
-```
-$ python3 -m venv .venv
+cd existing_repo
+git remote add origin https://gitlab.aws.dev/karimakh/rag-finetuning.git
+git branch -M main
+git push -uf origin main
 ```
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+## Integrate with your tools
 
-```
-$ source .venv/bin/activate
-```
+- [ ] [Set up project integrations](https://gitlab.aws.dev/karimakh/rag-finetuning/-/settings/integrations)
 
-If you are a Windows platform, you would activate the virtualenv like this:
+## Collaborate with your team
 
-```
-% .venv\Scripts\activate.bat
-```
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
 
-Once the virtualenv is activated, you can install the required dependencies.
+## Test and Deploy
 
-```
-$ pip install -r requirements.txt
-```
+Use the built-in continuous integration in GitLab.
 
-### IMPORTANT : Update Config file 
-**Open `config.py` and adjust the below parmaters as per your application configuration**:
-- ACCOUNT_ID
-- ACCOUNT_REGION
-- RAG_PROJ_NAME
-- CHUNKING_STRATEGY
-- MAX_TOKENS
-- OVERLAP_PERCENTAGE
-- S3_BUCKET_NAME
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
 
+***
 
-**Save it!**
+# Editing this README
 
-At this point you can now prepare the code zip and synthesize the CloudFormation template for this code. 
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
 
-On your terminal, export your AWS credentials for a role/user in ACCOUNT_ID. The role needs to have all permissions necessary to do the operations in this repository:
-```
-export AWS_REGION="<region>" # Same region as ACCOUNT_REGION above
-export AWS_ACCESS_KEY_ID="<access-key>" # Set to the access key of your role/user
-export AWS_SECRET_ACCESS_KEY="<secret-key>" # Set to the secret key of your role/user
-```
+## Suggestions for a good README
 
-To create the dependency run:
-```
-./prepare.sh
-```
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
 
-When deploying for the *first time*, run:
-```
-cdk bootstrap
-```
+## Name
+Choose a self-explaining name for your project.
 
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-```
-$ cdk synth
-```
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
 
-As this deployment contains multiple stacks, you have to deploy them in a specific sequence. Deploy the stack(s) in following order
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-```
-$ cdk deploy KbRoleStack 
-```
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-```
-$ cdk deploy OpenSearchServerlessInfraStack 
-```
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-```
-$ cdk deploy KbInfraStack 
-```
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
 
-To Destroy the stack(s)
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
 
-```
-$ cdk destroy --all 
-```
+## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
 
-## Useful commands
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
 
-Enjoy!
+## License
+For open source projects, say how it is licensed.
+
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.

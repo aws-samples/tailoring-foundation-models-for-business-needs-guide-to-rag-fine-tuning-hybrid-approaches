@@ -194,28 +194,6 @@ class OpenSearchServerlessInfraStack(Stack):
         "aoss:Delete*"
       ],
       resources=["*"]))
-      """
-      oss_index_creation_lambda = _lambda.Function(
-          self,
-          "BKB-OSS-InfraSetupLambda",
-          function_name=f"BKB-OSS-{indexName}-InfraSetupLambda",
-          code=Code.from_asset("src/amazon_bedrock_knowledge_base_infra_setup_lambda"),
-          handler="oss_handler.lambda_handler",
-          role=oss_lambda_role,
-          memory_size=1024,
-          timeout=Duration.minutes(14),
-          runtime=Runtime.PYTHON_3_8,
-          tracing=Tracing.ACTIVE,
-          current_version_options={"removal_policy": RemovalPolicy.DESTROY},
-          layers = [dependency_layer],
-          environment={
-              "POWERTOOLS_SERVICE_NAME": "InfraSetupLambda",
-              "POWERTOOLS_METRICS_NAMESPACE": "InfraSetupLambda-NameSpace",
-              "POWERTOOLS_LOG_LEVEL": "INFO",
-          },
-      )
-      """
-
 
       oss_index_creation_lambda = PythonFunction(
           self,

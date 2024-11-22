@@ -9,11 +9,6 @@ NOTE: If deploying to production, set this to true.
 
 EMBEDDING_MODEL_IDs = ["amazon.titan-embed-text-v2:0"]
 CHUNKING_STRATEGIES = {0:"Default chunking",1:"Fixed-size chunking", 2:"No chunking"}
-BEDROCK_MODELS = {
-        "claude-v2" : "anthropic.claude-v2",
-        "command-light": "cohere.command-light-text-v14",
-        "llama3_8b_instruct": "meta.llama3-8b-instruct-v1:0"
-    }
 
 class EnvSettings:
     # General params
@@ -36,7 +31,3 @@ class DsConfig:
 class OpenSearchServerlessConfig:
     COLLECTION_NAME = f"{EnvSettings.RAG_PROJ_NAME}-kb-collection"
     INDEX_NAME = f"{EnvSettings.RAG_PROJ_NAME}-kb-index"
-
-class RAGConfig:
-    BEDROCK_MODEL = "llama3_8b_instruct" # TODO: Choose the Bedrock Model option (claude-v2, command-light, llama3_8b_instruct)
-    NUMBER_OF_RESULTS = 5  # TODO: 

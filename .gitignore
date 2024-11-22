@@ -1,0 +1,25 @@
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+env/
+ENV/
+
+# CDK related
+cdk.out/
+
+infrastructure/__pycache__/
+infrastructure/cdk.out
+infrastructure/resources/
+
+# Log and temporary files
+*.log
+*.tmp
+
+# Data folders
+#data/
+
+# MacOS files
+.DS_Store

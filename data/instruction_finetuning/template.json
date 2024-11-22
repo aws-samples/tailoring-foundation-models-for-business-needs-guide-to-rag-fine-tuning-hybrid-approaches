@@ -1,0 +1,1 @@
+{"prompt": "You are a helpful AI assistant. You are intelligent and concise. Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n If you don't know the answer, just say, \"I don't know.\" Don't make anything up. ### Instruction:\n Answer the customer's question: {question}\n\n", "completion": "{answer}"}

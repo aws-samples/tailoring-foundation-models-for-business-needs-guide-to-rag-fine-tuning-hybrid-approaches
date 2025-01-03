@@ -11,7 +11,7 @@ from infrastructure.stacks.kb_role_stack import KbRoleStack
 from infrastructure.stacks.oss_infra_stack import OpenSearchServerlessInfraStack
 from infrastructure.stacks.kb_infra_stack import KbInfraStack
 from infrastructure.stacks.s3_stack import S3Stack
-from utils.helpers import logger, upload_data_S3
+from utils.helpers import logger, upload_data_S3, create_summary_table
 from src import rag, finetuning, hybrid, llm_evaluator, evaluation
 
 import boto3
@@ -53,7 +53,6 @@ data_folder_path = "data"
 
 
 if __name__ == "__main__":
-    
     logger.info("Starting the application...")
     logger.info("START - Build Knowledge Base")
 
@@ -108,19 +107,19 @@ if __name__ == "__main__":
 
     logger.info("START - Finetune Model")
     predictor = finetuning_obj.finetune_model(data_location, True)
-    #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct")
+    #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct") # Use this line if you already finetuned the model but don't have the endpoint, instead of above line.
     logger.info("FINISH - Finetune Model")
 
     #endpoint_name = "llama-3-1-8b-instruct-2024-11-14-14-03-53-799" #TODO: If you want to use already deployed model, find the correct endpoint name
     logger.info("START - Testing FINETUNING")
     finetuning_obj.test_finetuned_model(predictor, None)
+    #finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.
+
     logger.info("FINISH - Testing FINETUNING")
 
-    finetuning_obj.test_finetuned_model(None, endpoint_name)
-
     hybrid_obj = hybrid.Hybrid(
-        None, # predictor
-        'llama3-8b-instruct-endpoint', #endpoint_name,
+        predictor, # predictor
+        None, #endpoint_name eg. 'llama3-8b-instruct-endpoint',
         rag_obj,
         finetuning_obj,
         knowledge_base_id,
@@ -165,6 +164,9 @@ if __name__ == "__main__":
     )
     logger.info("FINISH - Evaluation")
 
+    logger.info("START - Summary Table Creation")
+    create_summary_table()
+    logger.info("FINISH - Summary Table Creation")
     
     
     #Clean-up

@@ -14,16 +14,20 @@ from stacks.s3_stack import S3Stack
 
 app = cdk.App()
 
-S3Stack(app, "S3Stack")
+s3_stack = S3Stack(app, "S3Stack")
 
 # create IAM role for RAG
 
-KbRoleStack(app, "KbRoleStack")
+kb_role_stack = KbRoleStack(app, "KbRoleStack")
+kb_role_stack.add_dependency(s3_stack)
 
 # setup OSS
-OpenSearchServerlessInfraStack(app, "OpenSearchServerlessInfraStack")
+oss_stack = OpenSearchServerlessInfraStack(app, "OpenSearchServerlessInfraStack")
+oss_stack.add_dependency(kb_role_stack)
 
 # # create Knowledgebase and datasource
-KbInfraStack(app, "KbInfraStack")
+kb_infra_stack = KbInfraStack(app, "KbInfraStack")
+kb_infra_stack.add_dependency(oss_stack)
+
 
 app.synth()

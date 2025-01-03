@@ -1,6 +1,6 @@
 import logging, boto3, os, json, re
 from typing import Dict, List, Tuple
-from dataclasses import dataclass
+import pandas as pd
 
 
 # Configure logging
@@ -36,7 +36,6 @@ def json_to_jsonl(json_file_path, output_file_path):
             json.dump(record, outfile)
             outfile.write('\n') 
 
-
 def template_and_predict(predictor, template, question, context, ground_truth, input_output_demarkation_key="\n\n### Response:\n"):
 
     inputs = template["prompt"].format(question=question, context=context)
@@ -46,12 +45,10 @@ def template_and_predict(predictor, template, question, context, ground_truth, i
     response = predictor.predict(payload)
     return inputs, ground_truth, response
 
-
 def load_json_file(file_path: str) -> List[Dict]:
         """Load and parse a JSON file."""
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
-
 
 def get_stack_outputs(stack_name: str, region: str) -> dict:
     """
@@ -69,3 +66,60 @@ def get_stack_outputs(stack_name: str, region: str) -> dict:
     outputs = response['Stacks'][0]['Outputs']
     
     return {output['OutputKey']: output['OutputValue'] for output in outputs}
+
+def create_summary_table(output_dir="data/output", summary_file="summary_results.csv"):
+    """
+    Creates a summary table with average scores from the three JSON files.
+    
+    Args:
+        output_dir (str): Directory containing the JSON files
+        summary_file (str): Name of the output summary file
+    """
+    # Dictionary to store results
+    results = {
+        'method': [],
+        'avg_bert_score': [],
+        'avg_llm_evaluator_score': []
+    }
+    
+    # List of files to process
+    files = ['rag_results.json', 'instruction_finetuning_results.json', 'hybrid_results.json']
+    
+    # Process each file
+    for file in files:
+        file_path = os.path.join(output_dir, file)
+        method = file.replace('_results.json', '') # Extract method name from filename
+                
+        try:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+            
+            # Calculate averages
+            bert_scores = [sample.get('bert_score', 0) for sample in data]
+            llm_scores = [sample.get('llm_evaluator_score', 0) for sample in data]
+            
+            avg_bert = sum(bert_scores) / len(bert_scores) if bert_scores else 0
+            avg_llm = sum(llm_scores) / len(llm_scores) if llm_scores else 0
+            
+            # Store results
+            results['method'].append(method)
+            results['avg_bert_score'].append(round(avg_bert, 4))
+            results['avg_llm_evaluator_score'].append(round(avg_llm, 4))
+            
+        except FileNotFoundError:
+            print(f"Warning: {file} not found in {output_dir}")
+        except json.JSONDecodeError:
+            print(f"Warning: Error decoding {file}")
+        except Exception as e:
+            print(f"Error processing {file}: {str(e)}")
+    
+    # Create DataFrame and save to CSV
+    df = pd.DataFrame(results)
+    output_path = os.path.join(output_dir, summary_file)
+    df.to_csv(output_path, index=False)
+    
+    print(f"\nSummary table created at: {output_path}")
+    print("\nResults summary:")
+    print(df.to_string())
+    
+    return df

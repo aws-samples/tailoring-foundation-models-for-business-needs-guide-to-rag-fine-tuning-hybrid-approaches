@@ -54,16 +54,12 @@ data_folder_path = "data"
 
 if __name__ == "__main__":
     logger.info("Starting the application...")
-    logger.info("START - Build Knowledge Base")
-
     stack_outputs = get_stack_outputs("KbInfraStack", region)
 
     knowledge_base_id = stack_outputs['KnowledgeBaseId']
     data_source_id = stack_outputs['DataSourceId']
     logger.info(f"Knowledge Base ID: {knowledge_base_id}")
     logger.info(f"Data Source ID: {data_source_id}")
-
-    logger.info("FINISH - Build Knowledge Base")
 
     kb_configs = {
         "vectorSearchConfiguration": {
@@ -87,9 +83,9 @@ if __name__ == "__main__":
     logger.info("FINISH - Knowledge base sync")
 
     logger.info("START - Testing RAG")
-    rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
+    inference_time_rag = rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
     logger.info("FINISH - Testing RAG")
-
+    
     finetuning_obj = finetuning.Finetuning(
         bedrock_region=region,
         finetuning_method = finetuning_method,
@@ -100,20 +96,22 @@ if __name__ == "__main__":
         num_epoch = num_epoch
 
     )
-
+    
     logger.info("START - Prepare_data_finetuning")
     data_location = finetuning_obj.prepare_data_finetuning()
     logger.info("FINISH - Prepare_data_finetuning")
 
     logger.info("START - Finetune Model")
-    predictor = finetuning_obj.finetune_model(data_location, True)
+    predictor, training_time = finetuning_obj.finetune_model(data_location, True) # It will also deploy the model, if you want to deploy it later, change True to False
+    #logger.info(f'INFO - Trainig_time: {training_time:.2f} seconds')
     #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct") # Use this line if you already finetuned the model but don't have the endpoint, instead of above line.
     logger.info("FINISH - Finetune Model")
+    
 
-    #endpoint_name = "llama-3-1-8b-instruct-2024-11-14-14-03-53-799" #TODO: If you want to use already deployed model, find the correct endpoint name
+    #endpoint_name = "llama-3-1-8b-instruct-2025-01-20-13-02-34-404" #TODO: If you want to use already deployed model, find the correct endpoint name
     logger.info("START - Testing FINETUNING")
-    finetuning_obj.test_finetuned_model(predictor, None)
-    #finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.
+    inference_time_finetuning = finetuning_obj.test_finetuned_model(predictor, None)
+    #inference_time_finetuning = finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.
 
     logger.info("FINISH - Testing FINETUNING")
 
@@ -128,7 +126,7 @@ if __name__ == "__main__":
     )
 
     logger.info("START - Testing RAG on Finetuned model")
-    hybrid_obj.test_hybrid_model()
+    inference_time_hybrid = hybrid_obj.test_hybrid_model()
     logger.info("FINISH - Testing RAG on Finetuned model")
 
 
@@ -165,11 +163,17 @@ if __name__ == "__main__":
     logger.info("FINISH - Evaluation")
 
     logger.info("START - Summary Table Creation")
-    create_summary_table()
+    inference_times = {
+        'rag': inference_time_rag,
+        'instruction_finetuning': inference_time_finetuning,
+        'hybrid': inference_time_hybrid
+    }
+    print(inference_times)
+    create_summary_table(inference_times, "data/output","summary_results.csv")
     logger.info("FINISH - Summary Table Creation")
     
     
     #Clean-up
-    #finetuning_obj.delete_endpoint(endpoint_name = 'llama3-8b-instruct-endpoint')
+    #finetuning_obj.delete_endpoint(endpoint_name = 'llama3-8b-instruct-endpoint') #TODO: Replace with your actual endpoint name 
     #infra_dir = "./infrastructure"
     #run_command(f"cdk destroy --all", cwd=infra_dir) #TODO: Should we do this in code or should users do it from terminal

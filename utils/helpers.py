@@ -67,7 +67,7 @@ def get_stack_outputs(stack_name: str, region: str) -> dict:
     
     return {output['OutputKey']: output['OutputValue'] for output in outputs}
 
-def create_summary_table(output_dir="data/output", summary_file="summary_results.csv"):
+def create_summary_table(inference_times, output_dir, summary_file):
     """
     Creates a summary table with average scores from the three JSON files.
     
@@ -79,7 +79,8 @@ def create_summary_table(output_dir="data/output", summary_file="summary_results
     results = {
         'method': [],
         'avg_bert_score': [],
-        'avg_llm_evaluator_score': []
+        'avg_llm_evaluator_score': [],
+        'avg_inference_time': []
     }
     
     # List of files to process
@@ -105,6 +106,7 @@ def create_summary_table(output_dir="data/output", summary_file="summary_results
             results['method'].append(method)
             results['avg_bert_score'].append(round(avg_bert, 4))
             results['avg_llm_evaluator_score'].append(round(avg_llm, 4))
+            results['avg_inference_time'].append(inference_times[method])
             
         except FileNotFoundError:
             print(f"Warning: {file} not found in {output_dir}")

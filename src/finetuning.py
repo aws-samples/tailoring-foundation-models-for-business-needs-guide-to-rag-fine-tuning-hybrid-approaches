@@ -168,8 +168,8 @@ class Finetuning():
         """
         os.makedirs(f'data/{self.finetuning_method}', exist_ok=True)
 
-        json_to_jsonl('data/train/qa_dataset_train.json', f'data/{self.finetuning_method}/train.jsonl')
-        json_to_jsonl('data/test/qa_dataset_test.json', f'data/{self.finetuning_method}/test.jsonl')
+        json_to_jsonl('data/train/dataset_train.json', f'data/{self.finetuning_method}/train.jsonl')
+        json_to_jsonl('data/test/dataset_test.json', f'data/{self.finetuning_method}/test.jsonl')
 
         data_location = f"s3://{self.bucket_name}/{self.finetuning_method}"
         local_data_file_train = f"data/{self.finetuning_method}/train.jsonl"
@@ -245,8 +245,6 @@ class Finetuning():
         )
 
         return predictor
-                    
-
 
     def finetune_model(self, train_data_location, deploy: bool = True):
         """
@@ -260,6 +258,7 @@ class Finetuning():
             sagemaker.predictor.Predictor or None: Predictor object if deploy=True, None otherwise
         """
         output_path = f"s3://{self.bucket_name}/{self.finetuning_method}/output/jumpstart-{self.model_name}/"
+        start_time_training = time.time()  
 
         estimator = JumpStartEstimator(
             model_id=self.model_id,
@@ -286,7 +285,8 @@ class Finetuning():
             training_job_name=estimator.latest_training_job.name,
             model_data_url=estimator.model_data
         )
-        
+        end_time_training = time.time()
+
         # Deploy only if requested
         if deploy:
             predictor = estimator.deploy(
@@ -294,9 +294,13 @@ class Finetuning():
                 instance_type='ml.g5.12xlarge',
                 container_startup_health_check_timeout=240
             )
-            return predictor
-        
-        return None
+            end_time_training_deploying = time.time()
+            training_deployment_time = end_time_training_deploying - start_time_training
+            return predictor, training_deployment_time
+
+        training_time = end_time_training - start_time_training
+        return None, training_time
+    
     def delete_endpoint(self, predictor: Predictor = None, endpoint_name: str = None) -> None:
         """
         Delete the endpoint and associated resources.
@@ -344,7 +348,6 @@ class Finetuning():
             print(f"Error deleting endpoint: {str(e)}")
             raise
 
-
     def test_finetuned_model(self,predictor,endpoint_name):
         """
         Test the finetuned model with test dataset.
@@ -370,18 +373,23 @@ class Finetuning():
                 serializer=JSONSerializer(),  
                 deserializer=JSONDeserializer(),
             )
-            
+
+           
         with open(test_data_path, 'r') as file:
             results = []
+            inference_times = []
             for line in file:
+                step_start_1 = time.time()
                 # Parse each line as a JSON object
                 product_data = json.loads(line)
                 
                 question = product_data.get("question")
                 ground_truth = product_data.get("answer")
-
+                start_time = time.time() 
                 input_text, ground_truth, llm_response = template_and_predict(predictor, self.template, question,"", ground_truth)
-                
+                end_time = time.time()
+                inference_time = end_time - start_time
+                inference_times.append(inference_time)
                 try:
                     llm_response  = llm_response['generated_text']
                 except Exception as e:
@@ -393,8 +401,12 @@ class Finetuning():
                     'llm_response': llm_response,
                 }
                 results.append(results_dict)
+        avg_inference_time = sum(inference_times)/ len(inference_times)
 
         with open( f"data/output/{self.finetuning_method}_results.json", 'w') as json_file:
             json.dump(results, json_file, indent=4)
+        
+        
+        return avg_inference_time
         
                 

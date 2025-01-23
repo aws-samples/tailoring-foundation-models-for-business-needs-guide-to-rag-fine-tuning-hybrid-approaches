@@ -120,7 +120,7 @@ To run this solution, you'll need several AWS services working together. We auto
     * Sets up data source connections to S3
     * Synchronization between S3 and Knowledge Base 
 
-    You can deploy all of the stacks by running commands below    
+    You can deploy all of the stacks by running commands below. Make sure you are also running docker.   
 
 ```bash
 cd infrastructure 

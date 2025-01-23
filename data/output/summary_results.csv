@@ -1,4 +1,4 @@
-method,avg_bert_score,avg_llm_evaluator_score
-rag,0.9057,0.8411
-instruction_finetuning,0.8653,0.4822
-hybrid,0.8983,0.8456
+method,avg_bert_score,avg_llm_evaluator_score,avg_inference_time
+rag,0.899,0.8351,13.147209819157919
+domain_adaptation,0.8672,0.5407,4.159672546386719
+hybrid,0.8846,0.8589,17.700778214136758

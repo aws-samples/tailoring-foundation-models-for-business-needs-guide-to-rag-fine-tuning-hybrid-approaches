@@ -1,4 +1,4 @@
-from utils.helpers import json_to_jsonl, template_and_predict, logger
+from utils.helpers import json_to_jsonl, template_and_predict, logger 
 
 import sagemaker
 
@@ -15,7 +15,7 @@ from sagemaker.session import Session
 from sagemaker.serializers import JSONSerializer
 from sagemaker.deserializers import JSONDeserializer
 
-import os, json, boto3, time
+import os, json, boto3, time, shutil
 from datetime import datetime, timezone, timedelta
 
 
@@ -167,21 +167,22 @@ class Finetuning():
             str: S3 location of the prepared training data
         """
         os.makedirs(f'data/{self.finetuning_method}', exist_ok=True)
-
-        json_to_jsonl('data/train/dataset_train.json', f'data/{self.finetuning_method}/train.jsonl')
-        json_to_jsonl('data/test/dataset_test.json', f'data/{self.finetuning_method}/test.jsonl')
-
         data_location = f"s3://{self.bucket_name}/{self.finetuning_method}"
-        local_data_file_train = f"data/{self.finetuning_method}/train.jsonl"
-        local_data_file_test = f"data/{self.finetuning_method}/test.jsonl"
+        if self.finetuning_method == "instruction_finetuning":
+            local_data_file_train = f'data/{self.finetuning_method}/train.jsonl'
+            json_to_jsonl(f'data/train/{self.finetuning_method}_train.json', local_data_file_train)
+            with open(f"data/{self.finetuning_method}/template.json", "w") as f: #template is defined in config
+                json.dump(self.template, f)
+            S3Uploader.upload(f"data/{self.finetuning_method}/template.json", data_location)
+        else: #training dataset for domain adaptation in txt format. 
+            local_data_file_train = f"data/{self.finetuning_method}/train.txt"
+            shutil.copyfile(f'data/train/{self.finetuning_method}_train.txt', local_data_file_train)
+        
+        local_data_file_test = f'data/{self.finetuning_method}/test.jsonl'
+        json_to_jsonl(f'data/test/test.json', local_data_file_test) #same for instruction finetuning and domain adaptation
 
         S3Uploader.upload(local_data_file_train, data_location)
         S3Uploader.upload(local_data_file_test, data_location)
-
-        with open(f"data/{self.finetuning_method}/template.json", "w") as f:
-            json.dump(self.template, f)
-
-        S3Uploader.upload(f"data/{self.finetuning_method}/template.json", data_location)
         return data_location
 
     def save_model_info(self, training_job_name: str, model_data_url: str) -> None:
@@ -259,6 +260,10 @@ class Finetuning():
         """
         output_path = f"s3://{self.bucket_name}/{self.finetuning_method}/output/jumpstart-{self.model_name}/"
         start_time_training = time.time()  
+        if self.finetuning_method == "instruction_finetuning":
+            instruction_label = "True"
+        else:
+            instruction_label = "False"
 
         estimator = JumpStartEstimator(
             model_id=self.model_id,
@@ -266,7 +271,7 @@ class Finetuning():
             environment={"accept_eula": "true"},
             disable_output_compression=True,
             hyperparameters={
-                "instruction_tuned": "True",
+                "instruction_tuned": instruction_label,
                 "chat_dataset": "False",
                 "epoch": self.num_epoch,
                 "max_input_length": "4096",

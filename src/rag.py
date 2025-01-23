@@ -141,7 +141,6 @@ class Rag:
             results = []
             inference_times = []
             for product_data in data: 
-                step_start_1 = time.time()
                 # Parse each line as a JSON object
                 question = product_data.get("question")
                 ground_truth = product_data.get("answer")

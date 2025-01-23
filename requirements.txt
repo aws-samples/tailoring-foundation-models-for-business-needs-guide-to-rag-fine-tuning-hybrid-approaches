@@ -6,3 +6,4 @@ boto3~=1.35
 sagemaker~=2.232
 evaluate~=0.4
 bert_score~=0.3
+shutil

@@ -99,16 +99,17 @@ if __name__ == "__main__":
     
     logger.info("START - Prepare_data_finetuning")
     data_location = finetuning_obj.prepare_data_finetuning()
+    logger.info(f"INFO - Data location: {data_location}")
     logger.info("FINISH - Prepare_data_finetuning")
 
     logger.info("START - Finetune Model")
     predictor, training_time = finetuning_obj.finetune_model(data_location, True) # It will also deploy the model, if you want to deploy it later, change True to False
-    #logger.info(f'INFO - Trainig_time: {training_time:.2f} seconds')
+    logger.info(f'INFO - Trainig_time: {training_time:.2f} seconds')
     #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct") # Use this line if you already finetuned the model but don't have the endpoint, instead of above line.
     logger.info("FINISH - Finetune Model")
     
 
-    #endpoint_name = "llama-3-1-8b-instruct-2025-01-20-13-02-34-404" #TODO: If you want to use already deployed model, find the correct endpoint name
+    #endpoint_name = "llama-3-1-8b-instruct-2025-01-23-10-03-57-788" #TODO: If you want to use already deployed model, find the correct endpoint name
     logger.info("START - Testing FINETUNING")
     inference_time_finetuning = finetuning_obj.test_finetuned_model(predictor, None)
     #inference_time_finetuning = finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.
@@ -137,7 +138,7 @@ if __name__ == "__main__":
         score_pattern = evaluator_score_pattern
     )
 
-    finetuning_results = 'data/output/instruction_finetuning_results.json'
+    finetuning_results = f'data/output/{finetuning_method}_results.json'
     rag_results = 'data/output/rag_results.json'
     hybrid_results = 'data/output/hybrid_results.json'
 
@@ -165,11 +166,11 @@ if __name__ == "__main__":
     logger.info("START - Summary Table Creation")
     inference_times = {
         'rag': inference_time_rag,
-        'instruction_finetuning': inference_time_finetuning,
+        f'{finetuning_method}': inference_time_finetuning,
         'hybrid': inference_time_hybrid
     }
     print(inference_times)
-    create_summary_table(inference_times, "data/output","summary_results.csv")
+    create_summary_table(inference_times, finetuning_method, "data/output","summary_results.csv")
     logger.info("FINISH - Summary Table Creation")
     
     

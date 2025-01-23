@@ -40,7 +40,7 @@ def template_and_predict(predictor, template, question, context, ground_truth, i
 
     inputs = template["prompt"].format(question=question, context=context)
     inputs += input_output_demarkation_key
-    payload = {"inputs": inputs, "parameters": {"max_new_tokens": 4096}}
+    payload = {"inputs": inputs, "parameters": {"max_new_tokens": 2048}}
 
     response = predictor.predict(payload)
     return inputs, ground_truth, response
@@ -67,7 +67,7 @@ def get_stack_outputs(stack_name: str, region: str) -> dict:
     
     return {output['OutputKey']: output['OutputValue'] for output in outputs}
 
-def create_summary_table(inference_times, output_dir, summary_file):
+def create_summary_table(inference_times, finetuning_method, output_dir, summary_file):
     """
     Creates a summary table with average scores from the three JSON files.
     
@@ -84,11 +84,14 @@ def create_summary_table(inference_times, output_dir, summary_file):
     }
     
     # List of files to process
-    files = ['rag_results.json', 'instruction_finetuning_results.json', 'hybrid_results.json']
+    files = ['rag_results.json', f'{finetuning_method}_results.json', 'hybrid_results.json'] 
     
     # Process each file
     for file in files:
         file_path = os.path.join(output_dir, file)
+        if not os.path.exists(file_path):  # Check if the file exists
+            print(f"Warning: {file} not found in {output_dir}")
+            continue
         method = file.replace('_results.json', '') # Extract method name from filename
                 
         try:
@@ -108,8 +111,6 @@ def create_summary_table(inference_times, output_dir, summary_file):
             results['avg_llm_evaluator_score'].append(round(avg_llm, 4))
             results['avg_inference_time'].append(inference_times[method])
             
-        except FileNotFoundError:
-            print(f"Warning: {file} not found in {output_dir}")
         except json.JSONDecodeError:
             print(f"Warning: Error decoding {file}")
         except Exception as e:

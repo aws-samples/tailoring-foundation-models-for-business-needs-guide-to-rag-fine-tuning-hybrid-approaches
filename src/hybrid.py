@@ -5,7 +5,7 @@ from sagemaker.deserializers import JSONDeserializer
 
 from utils.bedrock import BedrockHandler
 
-import os, json, boto3, glob
+import os, json, boto3, glob, time
 
 from utils.helpers import json_to_jsonl, template_and_predict
 
@@ -70,19 +70,22 @@ class Hybrid():
                 serializer=JSONSerializer(),  
                 deserializer=JSONDeserializer(),
             )
-       
+
         with open(test_data, 'r') as file:
             data = json.load(file)
             results = []
+            inference_times = []
             for product_data in data:
                 # Parse each line as a JSON object
                 question = product_data.get("question")
                 ground_truth = product_data.get("answer")
 
-                
+                start_time = time.time()
                 context = self.rag_obj.get_context(self.knowledge_base_id, question)
-
                 input_text, ground_truth, llm_response = template_and_predict(self.predictor, self.template, question, context, ground_truth)
+                end_time = time.time()
+                inference_time = end_time - start_time
+                inference_times.append(inference_time)
                 try:
                     llm_response  = llm_response['generated_text']
                 except Exception as e:
@@ -96,7 +99,10 @@ class Hybrid():
                     'context': context
                 }
                 results.append(results_dict)
-                
+
+        avg_inference_time = sum(inference_times)/ len(inference_times)
+                    
         with open( f"data/output/hybrid_results.json", 'w') as json_file:
             json.dump(results, json_file, indent=4)
+        return avg_inference_time
         

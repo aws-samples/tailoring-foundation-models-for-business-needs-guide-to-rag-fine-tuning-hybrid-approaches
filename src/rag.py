@@ -139,12 +139,15 @@ class Rag:
         with open(test_data_path, 'r') as file:
             data = json.load(file)
             results = []
-            for product_data in data:                
+            inference_times = []
+            for product_data in data: 
+                step_start_1 = time.time()
                 # Parse each line as a JSON object
                 question = product_data.get("question")
                 ground_truth = product_data.get("answer")
 
                 bedrock_messages = []
+                start_time = time.time()
                 context = self.get_context(knowledge_base_id, question)
 
                 prompt = self.rag_template.format(question=question, context=context)
@@ -155,6 +158,9 @@ class Rag:
                 )
 
                 response = bedrock_handler.invoke_model(bedrock_messages)
+                end_time = time.time()
+                inference_time = end_time - start_time
+                inference_times.append(inference_time)
                 #print(f"RESPONSE: {response}")
                 response_text = response['output']['message']['content'][0]['text']
 
@@ -165,18 +171,22 @@ class Rag:
                     'context': context
                 }
                 results.append(results_dict)
-
+                """
                 print(f'Input: {question}')
                 print(f'Ground_truth: {ground_truth}')
                 print(f'LLM response: {response_text}')
                 
                 print(f'Context: {context}')
+                """
 
                 counter += 1
+        
+        avg_inference_time = sum(inference_times)/ len(inference_times)
 
         results_file_path = "data/output/rag_results.json"
         os.makedirs(os.path.dirname(results_file_path), exist_ok=True)
 
         with open(results_file_path, 'w') as json_file:
             json.dump(results, json_file, indent=4)
-                    
+            
+        return avg_inference_time

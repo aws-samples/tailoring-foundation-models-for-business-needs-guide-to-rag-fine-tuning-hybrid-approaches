@@ -43,14 +43,14 @@ class OpenSearchServerlessConfig:
 
 class RAGConfig:
     MODEL_NAME = "llama3_8b_instruct"
-    MODEL_ID = MODELS_RAG["llama3_8b_instruct"]
+    MODEL_ID = "meta.llama3-8b-instruct-v1:0"
     NUMBER_OF_RESULTS = 3  # TODO: You can try different context count for RAG
 
 class FinetuningConfig:
     MODEL_NAME = "llama3_8b_instruct"
-    MODEL_ID = MODELS_FINETUNING["llama3_8b_instruct"] # TODO: Choose the Bedrock Model option (claude-v2, command-light, llama3_8b_instruct)
+    MODEL_ID = "meta-textgeneration-llama-3-1-8b-instruct"
     METHOD = "domain_adaptation" # TODO: Choose Finetuning method. eg:"domain_adaptation", "instruction_finetuning"
-    NUM_EPOCH = 8 # TODO: Adjust if needed, default is 5
+    NUM_EPOCH = 8 # TODO: Adjust if needed, default is 8
 
 class EvaluationConfig:
     MODELS_EVAL = {

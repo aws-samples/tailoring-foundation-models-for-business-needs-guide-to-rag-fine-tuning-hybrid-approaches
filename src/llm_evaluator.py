@@ -62,11 +62,11 @@ class LLMEvaluator:
                 hybrid_score = float(scores.group(3))
 
             except IndexError as e:
-                logger.Error("Error accessing the scores:", e)
-                logger.INFO(f"Response text: {response_text}")
+                logger.error("Error accessing the scores:", e)
+                logger.error(f"Response text: {response_text}")
 
         else:
-            logger.Error("No matches found.")
-            logger.Error(f"Response text: {response_text}")
+            logger.error("No matches found.")
+            logger.error(f"Response text: {response_text}")
 
         return finetuning_score, rag_score, hybrid_score

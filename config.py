@@ -10,15 +10,6 @@ NOTE: If deploying to production, set this to true.
 EMBEDDING_MODEL_IDs = ["amazon.titan-embed-text-v2:0"]
 CHUNKING_STRATEGIES = {0:"Default chunking",1:"Fixed-size chunking", 2:"No chunking"}
 
-#Sagemaker
-MODELS_FINETUNING = {
-        "llama3_8b_instruct": "meta-textgeneration-llama-3-1-8b-instruct"
-    }
-#Bedrock
-MODELS_RAG = {
-        "llama3_8b_instruct": "meta.llama3-8b-instruct-v1:0"
-    }
-
 class EnvSettings:
     # General params
     ACCOUNT_ID =  "339712995635" # TODO: Change this to your account

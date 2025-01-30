@@ -5,7 +5,7 @@ import aws_cdk as cdk
 from utils.build_infra import build_kb, delete_all
 from constructs import DependencyGroup
 
-from config import EnvSettings, KbConfig, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig, Templates
+from config import EnvSettings, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig, Templates
 
 from infrastructure.stacks.kb_role_stack import KbRoleStack
 from infrastructure.stacks.oss_infra_stack import OpenSearchServerlessInfraStack
@@ -22,10 +22,6 @@ from utils.helpers import json_to_jsonl, template_and_predict, get_stack_outputs
 
 
 region = EnvSettings.ACCOUNT_REGION
-account_id = EnvSettings.ACCOUNT_ID
-
-kb_role_name = KbConfig.KB_ROLE_NAME
-kb_name = KbConfig.KB_NAME
 
 bucket_name = DsConfig.S3_BUCKET_NAME
 kb_data_folder = DsConfig.KB_DATA_FOLDER
@@ -34,6 +30,7 @@ model_id_finetuning = FinetuningConfig.MODEL_ID
 model_name_finetuning = FinetuningConfig.MODEL_NAME
 finetuning_method = FinetuningConfig.METHOD
 num_epoch = FinetuningConfig.NUM_EPOCH
+finetuning_instance = FinetuningConfig.INCTANCE
 
 number_of_results = RAGConfig.NUMBER_OF_RESULTS
 model_id_rag = RAGConfig.MODEL_ID
@@ -93,7 +90,8 @@ if __name__ == "__main__":
         model_name = model_name_finetuning,
         bucket_name = bucket_name,
         template = finetuning_template,
-        num_epoch = num_epoch
+        num_epoch = num_epoch,
+        finetuning_instance = finetuning_instance
 
     )
     
@@ -105,11 +103,11 @@ if __name__ == "__main__":
     logger.info("START - Finetune Model")
     predictor, training_time = finetuning_obj.finetune_model(data_location, True) # It will also deploy the model, if you want to deploy it later, change True to False
     logger.info(f'INFO - Trainig_time: {training_time:.2f} seconds')
-    #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama3_8b_instruct") # Use this line if you already finetuned the model but don't have the endpoint, instead of above line.
+    #predictor= finetuning_obj.create_endpoint_from_saved_model(model_name = "llama-3-1-8b-instruct-2025-01-23-23-54-34-307") # Use this line if you already finetuned the model but don't have the endpoint, instead of above line.
     logger.info("FINISH - Finetune Model")
     
 
-    #endpoint_name = "llama-3-1-8b-instruct-2025-01-23-10-03-57-788" #TODO: If you want to use already deployed model, find the correct endpoint name
+    #endpoint_name = "llama-3-1-8b-instruct-2025-01-30-10-03-55-806" #TODO: If you want to use already deployed model, find the correct endpoint name
     logger.info("START - Testing FINETUNING")
     inference_time_finetuning = finetuning_obj.test_finetuned_model(predictor, None)
     #inference_time_finetuning = finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.

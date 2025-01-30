@@ -13,16 +13,3 @@ DEPENDENCY_DIR=python
 pip install -r $SCRIPT_DIR/requirements.txt -t $RESOURCE_DIR/$DEPENDENCY_DIR
 cd $RESOURCE_DIR && zip -r dependency_layer.zip $DEPENDENCY_DIR
 rm -rf $DEPENDENCY_DIR
-
-#Old requirements.txt
-
-#pytest==6.2.5
-#aws-lambda-powertools
-#boto3
-#requests-aws4auth
-#opensearch-py
-#aws-cdk-lib==2.141.0
-#constructs>=10.0.0,<11.0.0
-#aws-cdk.aws-lambda-python-alpha
-#aws_lambda_powertools
-

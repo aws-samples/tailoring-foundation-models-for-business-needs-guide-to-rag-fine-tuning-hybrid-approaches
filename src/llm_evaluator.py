@@ -51,15 +51,33 @@ class LLMEvaluator:
         }]
         
         response = bedrock_handler.invoke_model(message)
+
         response_text = response['output']['message']['content'][0]['text']
 
-        scores = re.search(pattern, response_text)
+        scores = re.search(pattern, response_text, re.DOTALL)
 
         if scores:
+            json_string = scores.group(1).strip()
+
+            if not json_string.strip().startswith('{'): #to fix bad formatted text
+                json_string = '{' + json_string + '}'
+
+            json_string = re.sub(r'\s+', ' ', json_string)  # normalize whitespace
+            json_string = json_string.replace("'", '"')
+
+            # Fix common JSON formatting issues
+            json_string = re.sub(r'"}*\s*$', '"}', json_string)  # Fix extra quotes at the end
+            json_string = re.sub(r'"\s*,\s*}', '"}', json_string)  # Fix trailing comma
+            json_string = re.sub(r'(\d+)"(?=\s*[,}])', r'\1', json_string)  # Fix quoted numbers
+
+
             try:
-                finetuning_score = float(scores.group(1))
-                rag_score = float(scores.group(2))
-                hybrid_score = float(scores.group(3))
+                json_object = json.loads(json_string)
+
+                # Extract scores
+                finetuning_score = json_object.get('text1_score')
+                rag_score = json_object.get('text2_score')
+                hybrid_score = json_object.get('text3_score')
 
             except IndexError as e:
                 logger.error("Error accessing the scores:", e)
@@ -67,6 +85,9 @@ class LLMEvaluator:
 
         else:
             logger.error("No matches found.")
+            logger.error(f"Scores: {scores}")
+            logger.error(f"Message: {message}")
+            logger.error(f"Response: {response}")
             logger.error(f"Response text: {response_text}")
 
         return finetuning_score, rag_score, hybrid_score

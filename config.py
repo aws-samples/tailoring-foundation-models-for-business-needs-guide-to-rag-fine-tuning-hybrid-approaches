@@ -10,15 +10,6 @@ NOTE: If deploying to production, set this to true.
 EMBEDDING_MODEL_IDs = ["amazon.titan-embed-text-v2:0"]
 CHUNKING_STRATEGIES = {0:"Default chunking",1:"Fixed-size chunking", 2:"No chunking"}
 
-#Sagemaker
-MODELS_FINETUNING = {
-        "llama3_8b_instruct": "meta-textgeneration-llama-3-1-8b-instruct"
-    }
-#Bedrock
-MODELS_RAG = {
-        "llama3_8b_instruct": "meta.llama3-8b-instruct-v1:0"
-    }
-
 class EnvSettings:
     # General params
     ACCOUNT_ID =  "339712995635" # TODO: Change this to your account
@@ -43,14 +34,15 @@ class OpenSearchServerlessConfig:
 
 class RAGConfig:
     MODEL_NAME = "llama3_8b_instruct"
-    MODEL_ID = MODELS_RAG["llama3_8b_instruct"]
+    MODEL_ID = "meta.llama3-8b-instruct-v1:0"
     NUMBER_OF_RESULTS = 3  # TODO: You can try different context count for RAG
 
 class FinetuningConfig:
     MODEL_NAME = "llama3_8b_instruct"
-    MODEL_ID = MODELS_FINETUNING["llama3_8b_instruct"] # TODO: Choose the Bedrock Model option (claude-v2, command-light, llama3_8b_instruct)
+    MODEL_ID = "meta-textgeneration-llama-3-1-8b-instruct"
     METHOD = "domain_adaptation" # TODO: Choose Finetuning method. eg:"domain_adaptation", "instruction_finetuning"
-    NUM_EPOCH = 8 # TODO: Adjust if needed, default is 5
+    INCTANCE = 'ml.g5.12xlarge'
+    NUM_EPOCH = 8 # TODO: Adjust if needed, default is 8
 
 class EvaluationConfig:
     MODELS_EVAL = {
@@ -71,14 +63,15 @@ class EvaluationConfig:
         "Text 1: {finetuning_text}\n\n"
         "Text 2: {rag_text}\n\n"
         "Text 3: {hybrid_text}\n\n"
-        "Provide your evaluation score in this format for Text1, Text2 and Text3. Make sure that you only provide the scores without explanation:\n"
-        "Text1 Score: [score]\n"
-        "Text2 Score: [score]\n"
-        "Text3 Score: [score]\n"
+        "Provide your evaluation score as json object similar to the following output surrounded by <output> and </output>\n"
+        "<output>"
+        "{{\"text1_score\": 0.5,"
+        "\"text2_score\": 0.5,"
+        "\"text3_score\": 0.5}}"
+        "</output>"
     )  #TODO: Modify it according to your usecase
 
-    SCORE_PATTERN = r"Text1 Score: (\d+\.?\d*)[^\n]*\nText2 Score: (\d+\.?\d*)[^\n]*\nText3 Score: (\d+\.?\d*)[^\n]*" #TODO: Changes might needed for different prompt templates
-
+    SCORE_PATTERN = r'<output>(.*?)</output>' #TODO: Changes might needed for different prompt template
 
 
 class Templates:

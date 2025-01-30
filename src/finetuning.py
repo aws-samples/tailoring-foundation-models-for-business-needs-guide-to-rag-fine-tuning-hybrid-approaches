@@ -41,7 +41,8 @@ class Finetuning():
                 model_name: str,
                 bucket_name: str,
                 template: dict,
-                num_epoch: int
+                num_epoch: int,
+                finetuning_instance:str
                 ):
         self.bedrock_region = bedrock_region
         self.finetuning_method = finetuning_method
@@ -50,6 +51,7 @@ class Finetuning():
         self.bucket_name = bucket_name
         self.template = template
         self.num_epoch = num_epoch
+        self.finetuning_instance = finetuning_instance
     
 
         
@@ -276,7 +278,7 @@ class Finetuning():
                 "epoch": self.num_epoch,
                 "max_input_length": "4096",
             },
-            instance_type='ml.g5.12xlarge',
+            instance_type=self.finetuning_instance,
             sagemaker_session=self.sagemaker_session,
             output_path=output_path,
             role=self.role_arn
@@ -296,7 +298,7 @@ class Finetuning():
         if deploy:
             predictor = estimator.deploy(
                 initial_instance_count=1,
-                instance_type='ml.g5.12xlarge',
+                instance_type=self.finetuning_instance,
                 container_startup_health_check_timeout=240
             )
             end_time_training_deploying = time.time()

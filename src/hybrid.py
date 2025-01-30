@@ -89,7 +89,7 @@ class Hybrid():
                 try:
                     llm_response  = llm_response['generated_text']
                 except Exception as e:
-                    logger.Error("Error! Llm responce does not have generated_text field")
+                    logger.error("Error! Llm responce does not have generated_text field")
 
 
                 results_dict = {

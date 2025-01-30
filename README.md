@@ -1,7 +1,7 @@
 
 # RAG - Fine-Tuning Comparison Project
 
-This project provides a framework to evaluate and compare different LLM implementation strategies using the **Llama 3.1 8B Instruct** model. It helps determine the most effective approach for specific use cases by analyzing performance across **RAG**, **Fine-tuning**, and **Hybrid** (RAG on top of fine-tuning) methods.
+This project provides a framework to evaluate and compare different LLM implementation strategies using the **Llama 3.1 8B Instruct** model. It helps to determine the most effective approach for specific use cases by analyzing performance across **RAG**, **Fine-tuning**, and **Hybrid** (RAG on top of fine-tuning) methods.
 
 ---
 
@@ -21,6 +21,7 @@ This project provides a framework to evaluate and compare different LLM implemen
 
 2. ### **Set up Python environment**  
    ```bash
+   "export PYTHONPATH=$(pwd)"
    python3 -m venv .venv
    source .venv/bin/activate
    ```
@@ -30,8 +31,14 @@ This project provides a framework to evaluate and compare different LLM implemen
    pip install -r requirements.txt
    ```
 
-4. ### **Update config files**  
-   *TODO: We have 2 config files. Should we unify them?*
+4. ### **Install Bleurt for evaluation**  
+   ```bash
+   git clone https://github.com/google-research/bleurt.git
+   cd bleurt
+   pip install .
+   ```
+
+5. ### **Update config files**  
     Make the respective changes in the **config.py** file 
    ##### 1. Environment Settings
    Update the `EnvSettings` class with your AWS account information:
@@ -104,7 +111,7 @@ This project provides a framework to evaluate and compare different LLM implemen
     ```
 
 
-### 5. **Infrastructure Deployment**  
+## Infrastructure Deployment
 To run this solution, you'll need several AWS services working together. We automated this setup using AWS Cloud Development Kit (CDK). It consist of 4 different stacks, 
 - S3Stack
     * Creates an S3 bucket to store our product catalog dataset

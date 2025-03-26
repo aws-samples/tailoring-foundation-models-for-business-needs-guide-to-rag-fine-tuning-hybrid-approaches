@@ -55,7 +55,7 @@ This project provides a framework to evaluate and compare different LLM implemen
    ##### 3. Data Source Configuration
    Update the `DsConfig` class, 
    ```python
-   S3_BUCKET_NAME = f"rag-finetuning-comparison" #f"product-catalog-bucket-nvirginia" # Optional: Change this to the S3 bucket where your data is stored
+   S3_BUCKET_NAME = f"rag-finetuning-comparison-{ACCOUNT_ID}" #f"product-catalog-bucket-nvirginia" # Optional: Change this to the S3 bucket where your data is stored
    KB_DATA_FOLDER = f"kb-data" #Optional: Change this to the folder where your kb data is stored (under the S3 Bucket you have choosed previously)
     ```
 
@@ -172,7 +172,7 @@ For instruction fine-tuning with **Llama 3.1 8B Instruct**, training and testing
 Run the main script:
 
 ```bash
-python3 main.py
+python main.py
 ```
 
 ---

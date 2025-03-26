@@ -25,7 +25,7 @@ class KbConfig:
     OVERLAP_PERCENTAGE = 20 # TODO: Change this value accordingly
 
 class DsConfig:
-    S3_BUCKET_NAME = f"rag-finetuning-comparison" #f"product-catalog-bucket-nvirginia" # TODO: Change this to the S3 bucket where your data is stored
+    S3_BUCKET_NAME = f"rag-finetuning-comparison-{EnvSettings.ACCOUNT_ID}" #f"product-catalog-bucket-nvirginia" # TODO: Change this to the S3 bucket where your data is stored
     KB_DATA_FOLDER = f"kb-data" #TODO: Change this to the folder where your kb data is stored (under the S3 Bucket you have choosed previously)
 
 class OpenSearchServerlessConfig:

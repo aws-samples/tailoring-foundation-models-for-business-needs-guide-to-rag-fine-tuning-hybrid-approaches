@@ -41,7 +41,7 @@ class FinetuningConfig:
     MODEL_NAME = "llama3_8b_instruct"
     MODEL_ID = "meta-textgeneration-llama-3-1-8b-instruct"
     METHOD = "domain_adaptation" # TODO: Choose Finetuning method. eg:"domain_adaptation", "instruction_finetuning"
-    INCTANCE = 'ml.g5.12xlarge'
+    INSTANCE = 'ml.g5.12xlarge'
     NUM_EPOCH = 8 # TODO: Adjust if needed, default is 8
 
 class EvaluationConfig:

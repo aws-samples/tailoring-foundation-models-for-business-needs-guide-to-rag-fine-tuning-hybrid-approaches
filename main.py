@@ -29,7 +29,7 @@ model_id_finetuning = FinetuningConfig.MODEL_ID
 model_name_finetuning = FinetuningConfig.MODEL_NAME
 finetuning_method = FinetuningConfig.METHOD
 num_epoch = FinetuningConfig.NUM_EPOCH
-finetuning_instance = FinetuningConfig.INCTANCE
+finetuning_instance = FinetuningConfig.INSTANCE
 
 number_of_results = RAGConfig.NUMBER_OF_RESULTS
 model_id_rag = RAGConfig.MODEL_ID

@@ -2,7 +2,6 @@
 import os,sys,subprocess,time
 
 import aws_cdk as cdk
-from utils.build_infra import build_kb, delete_all
 from constructs import DependencyGroup
 
 from config import EnvSettings, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig, Templates

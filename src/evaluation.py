@@ -1,6 +1,3 @@
-
-from bleurt import score
-import tensorflow as tf
 import json
 from evaluate import load
 import numpy as np

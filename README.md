@@ -31,14 +31,7 @@ This project provides a framework to evaluate and compare different LLM implemen
    pip install -r requirements.txt
    ```
 
-4. ### **Install Bleurt for evaluation**  
-   ```bash
-   git clone https://github.com/google-research/bleurt.git
-   cd bleurt
-   pip install .
-   ```
-
-5. ### **Update config files**  
+4. ### **Update config files**  
     Make the respective changes in the **config.py** file 
    ##### 1. Environment Settings
    Update the `EnvSettings` class with your AWS account information:

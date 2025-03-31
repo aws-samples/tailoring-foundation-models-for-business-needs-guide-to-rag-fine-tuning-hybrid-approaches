@@ -189,5 +189,5 @@ class KbInfraStack(Stack):
     # Grant the Lambda function permission to start the ingestion job in Bedrock
     ingest_lambda.add_to_role_policy(iam.PolicyStatement(
         actions=["bedrock:StartIngestionJob"],
-        resources=["arn:aws:bedrock:*:*:knowledge-base/*"]
+        resources=[f"arn:aws:bedrock:{region}:{account_id}:knowledge-base/{kb_name}"]
     ))

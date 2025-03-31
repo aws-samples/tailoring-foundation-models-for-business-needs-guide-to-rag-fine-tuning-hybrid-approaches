@@ -48,7 +48,14 @@ class KbRoleStack(Stack):
                           sid="BedrockInvokeModelStatement",
                           effect=iam.Effect.ALLOW,
                           actions=["bedrock:InvokeModel"],
-                          resources=[f"arn:aws:bedrock:{region}::foundation-model/*"],
+                          resources=[
+                            f"arn:aws:bedrock:{region}::foundation-model/meta.llama3-8b-instruct-v1:0",
+                            f"arn:aws:bedrock:{region}::foundation-model/mistral.mixtral-8x7b-instruct-v0:1",
+                            f"arn:aws:bedrock:{region}::foundation-model/cohere.command-r-plus-v1:0",
+                            f"arn:aws:bedrock:{region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
+                            f"arn:aws:bedrock:{region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
+                            f"arn:aws:bedrock:{region}::foundation-model/amazon.titan-embed-text-v2:0"
+                            ],
                       )
                   ]
               ),

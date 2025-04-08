@@ -9,8 +9,7 @@ from sagemaker.s3 import S3Downloader
 from sagemaker.jumpstart.estimator import JumpStartEstimator
 from sagemaker.jumpstart.model import JumpStartModel
 from sagemaker.session import Session
-
-
+from sagemaker.exceptions import UnexpectedStatusException
 
 from sagemaker.serializers import JSONSerializer
 from sagemaker.deserializers import JSONDeserializer
@@ -285,7 +284,23 @@ class Finetuning():
         )
 
         # Train the model
-        estimator.fit({"training": train_data_location})
+
+        try:
+            estimator.fit({"training": train_data_location})
+        except UnexpectedStatusException as e:
+            if "AlgorithmError: ExecuteUserScriptError" in str(e):
+                logger.info("First attempt failed with ExecuteUserScriptError. Retrying once...")
+                try:
+                    estimator.fit({"training": train_data_location})
+                except Exception as retry_error:
+                    logger.error(f"Second attempt also failed: {str(retry_error)}")
+                    raise
+            else:
+                logger.error(f"Training failed with unexpected status: {str(e)}")
+                raise
+        except Exception as e:
+            logger.error(f"Training failed with error: {str(e)}")
+            raise
         
         # Save model information for later use
         self.save_model_info(

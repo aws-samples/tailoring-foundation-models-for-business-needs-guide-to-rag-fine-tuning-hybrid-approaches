@@ -1,4 +1,4 @@
-import os, json, boto3,re
+import os, json, boto3,re, json
 from utils.bedrock import BedrockHandler
 from utils.helpers import logger
 
@@ -82,6 +82,11 @@ class LLMEvaluator:
             except IndexError as e:
                 logger.error("Error accessing the scores:", e)
                 logger.error(f"Response text: {response_text}")
+            except json.JSONDecodeError as e:
+                logger.error("Error parsing JSON:", e)
+                logger.error(f"JSON string: {json_string}")
+                finetuning_score = rag_score = hybrid_score = -1
+
 
         else:
             logger.error("No matches found.")

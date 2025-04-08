@@ -145,11 +145,7 @@ class Finetuning():
                     print(f"Attached policy: {policy_arn}")
                 except Exception as e:
                     print(f"Warning: Could not attach policy {policy_arn}: {str(e)}")
-            
-            # Wait for role to propagate
-            print("Waiting for role to propagate...")
-            time.sleep(10)
-            
+             
             return response['Role']['Arn']
             
         except Exception as e:

@@ -96,8 +96,6 @@ def update_access_policy(oss_client, updated_policy, policy_version, policy_name
         type="data",
     )
     logger.info(response)
-    logger.info("Updated data access policy, sleeping for 2 minutes for permissions to propagate")
-    sleep(120)
 
 
 def get_updated_access_policy_with_caller_arn(policy, caller_arn):
@@ -118,15 +116,9 @@ def create_index_with_retries(oss_http_client, index_name, request_body):
         try:
             response = create_index(oss_http_client, index_name, request_body)
             logger.info(response)
-            logger.info(
-                "Created index {}, sleeping for 2 minutes for index to get ready".format(index_name)
-            )
-            sleep(120)
             return response
         except Exception as e:
             logger.info("Caught: " + str(e))
-            logger.info("Sleeping for 10 seconds and retrying.")
-            sleep(10)
             attempts += 1
             if attempts == 10:
                 raise e
@@ -136,8 +128,6 @@ def delete_index_if_present(oss_http_client, index_name):
     try:
         response = oss_http_client.indices.delete(index=index_name)
         logger.info(response)
-        logger.info("Deleted index {}, sleeping for 1 min".format(index_name))
-        sleep(60)
         return response
     except NotFoundError:
         logger.info("Index {} not found, skipping deletion".format(index_name))

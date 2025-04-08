@@ -25,7 +25,7 @@ kb_role_stack.add_dependency(s3_stack)
 oss_stack = OpenSearchServerlessInfraStack(app, "OpenSearchServerlessInfraStack")
 oss_stack.add_dependency(kb_role_stack)
 
-# # create Knowledgebase and datasource
+# create Knowledgebase and Datasource
 kb_infra_stack = KbInfraStack(app, "KbInfraStack")
 kb_infra_stack.add_dependency(oss_stack)
 

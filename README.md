@@ -1,7 +1,7 @@
 
-# RAG - Fine-Tuning Comparison Project
+# Tailoring foundation models for your business needs: A comprehensive guide to RAG, fine-tuning, and hybrid approaches
 
-This project provides a framework to evaluate and compare different LLM implementation strategies using the **Llama 3.1 8B Instruct** model. It helps to determine the most effective approach for specific use cases by analyzing performance across **RAG**, **Fine-tuning**, and **Hybrid** (RAG on top of fine-tuning) methods.
+This code sample provides a framework to evaluate and compare different FM customization strategies. It helps to determine the most effective approach for specific use cases by analyzing performance, cost and latency across **RAG**, **Fine-tuning**, and **Hybrid** (RAG on top of fine-tuning) methods. We have provided a synthetic data to experiment with, you shall replace it with your own data related to your use case, then you can run the evaluation by following the below instructions.
 
 ---
 

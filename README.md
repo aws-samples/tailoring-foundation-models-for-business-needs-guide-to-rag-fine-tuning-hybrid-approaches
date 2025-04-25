@@ -16,12 +16,13 @@ This project provides a framework to evaluate and compare different LLM implemen
 
 1. ### **Clone the repository**  
    ```bash
-   git clone [put the git link here]
+   git clone https://github.com/aws-samples/tailoring-foundation-models-for-business-needs-guide-to-rag-fine-tuning-hybrid-approaches.git
    ```
 
 2. ### **Set up Python environment**  
    ```bash
    "export PYTHONPATH=$(pwd)"
+   cd tailoring-foundation-models-for-business-needs-guide-to-rag-fine-tuning-hybrid-approaches/
    python3 -m venv .venv
    source .venv/bin/activate
    ```

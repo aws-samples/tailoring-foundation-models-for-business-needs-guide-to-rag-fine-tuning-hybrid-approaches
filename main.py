@@ -70,6 +70,15 @@ if __name__ == "__main__":
     )
     kb_data_path = f'{data_folder_path}/{kb_data_folder}'
     upload_data_S3(s3_client, data_folder_path, kb_data_path, bucket_name)
+    
+    logger.info("START - Knowledge base sync")
+    if not rag_obj.wait_for_kb_sync(
+        knowledge_base_id=knowledge_base_id,
+        data_source_id=data_source_id
+    ):
+        raise Exception("Knowledge base sync failed or timed out")
+    logger.info("FINISH - Knowledge base sync")
+
 
     logger.info("START - Testing RAG")
     inference_time_rag = rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)

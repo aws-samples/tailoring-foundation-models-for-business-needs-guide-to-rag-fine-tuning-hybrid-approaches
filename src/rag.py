@@ -32,7 +32,72 @@ class Rag:
 
         self.kb_configs = kb_configs
         self.rag_template = rag_template["prompt"]
-
+    
+    def wait_for_kb_sync(self, knowledge_base_id: str, data_source_id: str, max_wait_time: int = 900) -> bool:
+        """
+        Wait for knowledge base sync to complete.
+        """
+        timezone_offset = timezone(timedelta(hours=1))
+        
+        try:
+            # Get the most recent job
+            response = self.bedrock_agent.list_ingestion_jobs(  # Note the _runtime suffix
+                knowledgeBaseId=knowledge_base_id,
+                dataSourceId=data_source_id,
+                maxResults=1
+            )
+            
+            jobs = response.get('ingestionJobSummaries', [])  # Note: different key name
+            if not jobs:
+                print("No ingestion jobs found")
+                return True
+                
+            latest_job = jobs[0]
+            
+            # Check if job recently succeeded
+            if latest_job['status'] == 'SUCCEEDED':
+                job_end_time = latest_job.get('completionTime', datetime.now(timezone_offset))  # Note: different key name
+                if isinstance(job_end_time, str):
+                    job_end_time = datetime.fromisoformat(job_end_time.replace('Z', '+00:00')).astimezone(timezone_offset)
+                
+                time_since_completion = (datetime.now(timezone_offset) - job_end_time).total_seconds()
+                if time_since_completion < 2:
+                    print(f"Recent successful sync found (completed {time_since_completion:.0f} seconds ago)")
+                    return True
+            
+            # Wait for in-progress job
+            if latest_job['status'] == 'IN_PROGRESS':
+                print(f"Found active ingestion job: {latest_job['ingestionJobId']}")  # Note: different key name
+                start_time = time.time()
+                
+                while (time.time() - start_time) < max_wait_time:
+                    job_response = self.bedrock_agent.get_ingestion_job(  # Note the _runtime suffix
+                        knowledgeBaseId=knowledge_base_id,
+                        dataSourceId=data_source_id,
+                        ingestionJobId=latest_job['ingestionJobId']  # Note: different key name
+                    )
+                    
+                    status = job_response['status']
+                    print(f"Ingestion job status: {status}")
+                    
+                    if status == 'SUCCEEDED':
+                        print("Knowledge base sync completed successfully")
+                        return True
+                    elif status in ['FAILED', 'CANCELLED']:
+                        print(f"Ingestion job failed with status: {status}")
+                        print(f"Error message: {job_response.get('failureReason', 'No error message provided')}")  # Note: different key name
+                        return False
+                        
+                    time.sleep(30)
+                
+                print(f"Timeout waiting for knowledge base sync after {max_wait_time} seconds")
+                return False
+            
+            return True
+                
+        except Exception as e:
+            print(f"Error checking sync status: {str(e)}")
+            return False
 
     def get_context(self, kb_id: str, prompt: str) -> str:
         """

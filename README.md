@@ -178,8 +178,7 @@ In your AWS console:
 2. On the left handside select `AWS Services`
 3. Select Amazon SageMaker
 4. Then select `ml.g5.12xlarge for endpoint usage` 
-5. Press on `Request Increase at account level`, and set the quota value to 1
-This should get automatically approved and you will get the quota that you requested.
+5. Press on `Request Increase at account level`, and set the quota value to 1. This should get automatically approved.
 
 
 ### Run the main script

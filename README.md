@@ -163,8 +163,15 @@ For instruction fine-tuning with **Llama 3.1 8B Instruct**, training and testing
 
 ## Usage
 
-### Request model access to Amazon Bedrock Llama3.1B Instruct model
-Use [this guide](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access-modify.html) to request access to Llama3 8B Instruct model inside Amazon Bedrock
+### Request model access to Amazon Bedrock models
+Use [this guide](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access-modify.html) to request access to the follwoing Bedrock models:
+1. Llama 3 8B Instruct -> Used for RAG
+2. Mixtral 8x7B Instruct -> Used for evaluating the results
+3. Command R+  -> Used for evaluating the results
+4. Claude 3 Haiku  -> Used for evaluating the results
+
+
+
 ### Request quota increase for Amazon SageMaker AI endpoint usage
 In your AWS console:
 1. navigate to `Service Quotas` service

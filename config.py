@@ -12,7 +12,7 @@ CHUNKING_STRATEGIES = {0:"Default chunking",1:"Fixed-size chunking", 2:"No chunk
 
 class EnvSettings:
     # General params
-    ACCOUNT_ID =  "339712995635" # TODO: Change this to your account
+    ACCOUNT_ID =  "<<PLACEHOLDER>>" # TODO: Change this to your account
     ACCOUNT_REGION = "us-east-1" # TODO: Change this to your region
     RAG_PROJ_NAME = "rag-trial" # TODO: Change this to any name of your choice
 

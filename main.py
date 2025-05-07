@@ -6,16 +6,10 @@ from constructs import DependencyGroup
 
 from config import EnvSettings, DsConfig, RAGConfig, FinetuningConfig, EvaluationConfig, Templates
 
-from infrastructure.stacks.kb_role_stack import KbRoleStack
-from infrastructure.stacks.oss_infra_stack import OpenSearchServerlessInfraStack
-from infrastructure.stacks.kb_infra_stack import KbInfraStack
-from infrastructure.stacks.s3_stack import S3Stack
 from utils.helpers import logger, upload_data_S3, create_summary_table
 from src import rag, finetuning, hybrid, llm_evaluator, evaluation
 
 import boto3
-from sagemaker.s3 import S3Uploader
-
 from utils.helpers import json_to_jsonl, template_and_predict, get_stack_outputs
 
 
@@ -174,5 +168,4 @@ if __name__ == "__main__":
     
     
     #Clean-up
-    #finetuning_obj.delete_endpoint(endpoint_name = 'llama3-8b-instruct-endpoint') #TODO: Replace with your actual endpoint name 
-    #run "cdk destroy --all" command under infrastructure folder
+    # finetuning_obj.delete_endpoint(endpoint_name = 'llama3-8b-instruct-endpoint') #TODO: Replace with your actual endpoint name 

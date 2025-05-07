@@ -195,22 +195,15 @@ python main.py
 To delete all resources created during the infrastructure setup:
 
 ```bash
+cd infrastructure/
 cdk destroy --all
 ```
 
 ### 2. Endpoint Management
 
-#### Automatic Deletion
-Uncomment the following line in `main.py` to automatically delete the endpoint:
-
-```python
-finetuning_obj.delete_endpoint(endpoint_name='llama3-8b-instruct-endpoint')
-```
-
-#### Manual Deletion
-If you wish to delete the endpoint later:
-1. Access the **Amazon SageMaker Console**.
+To delete the SageMaker endpoint for the finetuned model:
+1. Access the **Amazon SageMaker AI Console**.
 2. Navigate to **Inference → Endpoints**.
-3. Select and delete the desired endpoint.
+3. Select and delete the desired endpoint. The endpoint name starts with `llama-3-1-8b-instruct-****`.
 
 --- 

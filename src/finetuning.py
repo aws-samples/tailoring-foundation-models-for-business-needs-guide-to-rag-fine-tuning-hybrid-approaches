@@ -370,7 +370,7 @@ class Finetuning():
             print(f"Error deleting endpoint: {str(e)}")
             raise
 
-    def test_finetuned_model(self,predictor,endpoint_name):
+    def evaluate_finetuned_model(self,predictor,endpoint_name):
         """
         Test the finetuned model with test dataset.
 

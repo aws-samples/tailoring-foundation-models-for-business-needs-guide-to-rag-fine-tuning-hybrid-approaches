@@ -43,7 +43,7 @@ class Hybrid():
         )
 
 
-    def test_hybrid_model(self):
+    def evaluate_hybrid_model(self):
         test_data_dir = f"data/test/"
         json_files = glob.glob(os.path.join(test_data_dir, "*.json"))
         if len(json_files) != 1:

@@ -6,7 +6,7 @@ This code sample provides a framework to evaluate and compare different FM custo
 ---
 
 ## Prerequisites
-- Python 3.x
+- Python >=3.9
 - AWS Account with appropriate permissions
 - Docker
 
@@ -21,9 +21,9 @@ This code sample provides a framework to evaluate and compare different FM custo
 
 2. ### **Set up Python environment**  
    ```bash
-   "export PYTHONPATH=$(pwd)"
    cd tailoring-foundation-models-for-business-needs-guide-to-rag-fine-tuning-hybrid-approaches/
-   python3 -m venv .venv
+   export PYTHONPATH=$(pwd)
+   python3.12 -m venv .venv
    source .venv/bin/activate
    ```
 
@@ -163,8 +163,20 @@ For instruction fine-tuning with **Llama 3.1 8B Instruct**, training and testing
 
 ## Usage
 
-Run the main script:
+### Request model access to Amazon Bedrock Llama3.1B Instruct model
+Use [this guide](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access-modify.html) to request access to Llama3 8B Instruct model inside Amazon Bedrock
+### Request quota increase for Amazon SageMaker AI endpoint usage
+In your AWS console:
+1. navigate to `Service Quotas` service
+2. On the left handside select `AWS Services`
+3. Select Amazon SageMaker
+4. Then select `ml.g5.12xlarge for endpoint usage` 
+5. Press on `Request Increase at account level`, and set the quota value to 1
+This should get automatically approved and you will get the quota that you requested.
 
+
+### Run the main script
+Make sure that you are in the root directory of the repository, then use the following command to run the main script:
 ```bash
 python main.py
 ```

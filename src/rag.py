@@ -1,9 +1,18 @@
 import base64
 import json
+import botocore
 from typing import Optional
 import os, boto3, time, glob
 from utils.bedrock import BedrockHandler, KBHandler
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception, retry_if_exception_type
 from datetime import datetime, timezone, timedelta
+
+
+def is_throttling_exception(e):
+    return isinstance(e, botocore.exceptions.ClientError) and e.response['Error']['Code'] in [
+        'ThrottlingException', 'TooManyRequestsException'
+    ]
+
 
 class Rag:
     """
@@ -123,12 +132,21 @@ class Rag:
         
         return context
 
-    def test_rag(self,knowledge_base_id, model_name, model_id):
+
+    @retry(
+        retry=retry_if_exception(is_throttling_exception),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
+    def safe_invoke_model(self, bedrock_handler, messages):
+        return bedrock_handler.invoke_model(messages)
+
+
+    def evaluate_rag(self,knowledge_base_id, model_name, model_id):
         bedrock_handler = BedrockHandler(
             self.bedrock_runtime, model_id
         )
-
-        counter = 1
 
         test_data_dir = f"data/test/"
         json_files = glob.glob(os.path.join(test_data_dir, "*.json"))
@@ -156,7 +174,7 @@ class Rag:
                     bedrock_handler.user_message(prompt)
                 )
 
-                response = bedrock_handler.invoke_model(bedrock_messages)
+                response = self.safe_invoke_model(bedrock_handler, bedrock_messages)
                 end_time = time.time()
                 inference_time = end_time - start_time
                 inference_times.append(inference_time)
@@ -177,8 +195,6 @@ class Rag:
                 
                 print(f'Context: {context}')
                 """
-
-                counter += 1
         
         avg_inference_time = sum(inference_times)/ len(inference_times)
 

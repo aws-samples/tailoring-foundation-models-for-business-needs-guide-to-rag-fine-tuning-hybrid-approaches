@@ -1,30 +1,16 @@
 from constructs import Construct
-
+import platform
 import aws_cdk as core
 from aws_cdk import (
     Duration,
     Stack,
     aws_iam as iam,
-    aws_sqs as sqs,
-    aws_sns as sns,
     aws_lambda as _lambda,
-    aws_sns_subscriptions as subs,
-    aws_logs as logs,
     aws_ssm as ssm,
-    aws_cloudformation as cfn
 )
 from aws_cdk import custom_resources as cr
-from aws_cdk.aws_iam import (
-  ManagedPolicy,
-  Role,
-  ServicePrincipal,
-)
-from aws_cdk.aws_lambda import (
-  Code,
-  Function,
-  Runtime,
-  Tracing,
-)
+from aws_cdk import aws_lambda as lambda_
+from aws_cdk.aws_iam import ServicePrincipal
 from aws_cdk.aws_logs import RetentionDays, LogGroup
 from aws_cdk.aws_opensearchserverless import (
   CfnAccessPolicy,
@@ -32,14 +18,15 @@ from aws_cdk.aws_opensearchserverless import (
   CfnSecurityPolicy,
 )
 
-from aws_cdk import (
-  custom_resources,
-  Duration,
-  RemovalPolicy,
-)
+from aws_cdk import Duration
 from config import EnvSettings, KbConfig, OpenSearchServerlessConfig
 
-from aws_cdk.aws_lambda_python_alpha import PythonFunction
+
+host_arch = platform.machine()
+is_m1_mac = host_arch in ["arm64", "aarch64"]
+# Set architecture and Docker platform accordingly
+lambda_arch = lambda_.Architecture.ARM_64 if is_m1_mac else lambda_.Architecture.X86_64
+docker_platform = "linux/arm64" if is_m1_mac else "linux/amd64"
 
 
 region = EnvSettings.ACCOUNT_REGION
@@ -175,7 +162,7 @@ class OpenSearchServerlessInfraStack(Stack):
 
       dependency_layer = _lambda.LayerVersion(self, 'dependency_layer',
                                           code=_lambda.Code.from_asset(dependencies_path),
-                                          compatible_runtimes=[_lambda.Runtime.PYTHON_3_8,_lambda.Runtime.PYTHON_3_9,_lambda.Runtime.PYTHON_3_10],
+                                          compatible_runtimes=[_lambda.Runtime.PYTHON_3_10],
                                           license='Apache-2.0',
                                           description='dependency_layer including requests, requests-aws4auth, aws-lambda-powertools, opensearch-py')
 
@@ -195,22 +182,23 @@ class OpenSearchServerlessInfraStack(Stack):
       ],
       resources=["*"]))
 
-      oss_index_creation_lambda = PythonFunction(
+      oss_index_creation_lambda = lambda_.Function(
           self,
           "BKB-OSS-InfraSetupLambda",
-          runtime=_lambda.Runtime.PYTHON_3_8,
-          entry="src/amazon_bedrock_knowledge_base_infra_setup_lambda",           # Directory containing your function code
-          index="oss_handler.py",
-          handler="lambda_handler",                   # Name of the function within your entry point
+          runtime=lambda_.Runtime.PYTHON_3_10,
+          handler="oss_handler.lambda_handler",
+          code=lambda_.Code.from_asset("src/amazon_bedrock_knowledge_base_infra_setup_lambda"),
           timeout=Duration.minutes(14),
           memory_size=1024,
           role=oss_lambda_role,
+          architecture=lambda_arch,
           environment={
               "POWERTOOLS_SERVICE_NAME": "InfraSetupLambda",
               "POWERTOOLS_METRICS_NAMESPACE": "InfraSetupLambda-NameSpace",
               "POWERTOOLS_LOG_LEVEL": "INFO",
           },
           layers=[dependency_layer]
+
       )
 
       # Create a custom resource provider which wraps around the lambda above

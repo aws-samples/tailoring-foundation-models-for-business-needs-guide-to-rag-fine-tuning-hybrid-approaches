@@ -80,9 +80,9 @@ if __name__ == "__main__":
     logger.info("FINISH - Knowledge base sync")
 
 
-    logger.info("START - Testing RAG")
-    inference_time_rag = rag_obj.test_rag(knowledge_base_id,model_name_rag, model_id_rag)
-    logger.info("FINISH - Testing RAG")
+    logger.info("START - Evaluating RAG")
+    inference_time_rag = rag_obj.evaluate_rag(knowledge_base_id,model_name_rag, model_id_rag)
+    logger.info("FINISH - Evaluating RAG")
     
     finetuning_obj = finetuning.Finetuning(
         bedrock_region=region,
@@ -96,10 +96,10 @@ if __name__ == "__main__":
 
     )
     
-    logger.info("START - Prepare_data_finetuning")
+    logger.info("START - Prepare data finetuning")
     data_location = finetuning_obj.prepare_data_finetuning()
     logger.info(f"INFO - Data location: {data_location}")
-    logger.info("FINISH - Prepare_data_finetuning")
+    logger.info("FINISH - Prepare data finetuning")
 
     logger.info("START - Finetune Model")
     predictor, training_time = finetuning_obj.finetune_model(data_location, True) # It will also deploy the model, if you want to deploy it later, change True to False
@@ -109,11 +109,11 @@ if __name__ == "__main__":
     
 
     #endpoint_name = "llama-3-1-8b-instruct-2025-01-30-10-03-55-806" #TODO: If you want to use already deployed model, find the correct endpoint name
-    logger.info("START - Testing FINETUNING")
-    inference_time_finetuning = finetuning_obj.test_finetuned_model(predictor, None)
+    logger.info("START - Evaluating FINETUNING")
+    inference_time_finetuning = finetuning_obj.evaluate_finetuned_model(predictor, None)
     #inference_time_finetuning = finetuning_obj.test_finetuned_model(None, endpoint_name) #TODO: If you want to use endpoint_name instead of predictor obj.
 
-    logger.info("FINISH - Testing FINETUNING")
+    logger.info("FINISH - Evaluating FINETUNING")
 
     hybrid_obj = hybrid.Hybrid(
         predictor, # predictor
@@ -125,9 +125,9 @@ if __name__ == "__main__":
         hybrid_template
     )
 
-    logger.info("START - Testing RAG on Finetuned model")
-    inference_time_hybrid = hybrid_obj.test_hybrid_model()
-    logger.info("FINISH - Testing RAG on Finetuned model")
+    logger.info("START - Evaluating RAG on Finetuned model")
+    inference_time_hybrid = hybrid_obj.evaluate_hybrid_model()
+    logger.info("FINISH - Evaluating RAG on Finetuned model")
 
 
     eval_obj = evaluation.Evaluation(

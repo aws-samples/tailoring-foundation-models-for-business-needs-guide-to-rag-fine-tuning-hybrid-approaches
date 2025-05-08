@@ -166,9 +166,10 @@ For instruction fine-tuning with **Llama 3.1 8B Instruct**, training and testing
 ### Request model access to Amazon Bedrock models
 Use [this guide](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access-modify.html) to request access to the follwoing Bedrock models:
 1. Llama 3 8B Instruct -> Used for RAG
-2. Mixtral 8x7B Instruct -> Used for evaluating the results
-3. Command R+  -> Used for evaluating the results
-4. Claude 3 Haiku  -> Used for evaluating the results
+2. Amazon Titan Text Embeddings V2 -> Used for RAG
+3. Mixtral 8x7B Instruct -> Used for evaluating the results
+4. Command R+  -> Used for evaluating the results
+5. Claude 3 Haiku  -> Used for evaluating the results
 
 
 

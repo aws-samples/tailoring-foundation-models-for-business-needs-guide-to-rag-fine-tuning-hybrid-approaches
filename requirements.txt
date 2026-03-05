@@ -3,7 +3,7 @@ opensearch-py==2.8.0
 aws_lambda_powertools
 aws-cdk-lib==2.194.0
 boto3==1.38.10
-sagemaker==2.244.0
+sagemaker==3.4.0
 evaluate==0.4.3
 bert-score==0.3.13
 transformers==4.51.3
